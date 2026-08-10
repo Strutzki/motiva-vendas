@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#6d28d9" />
+<title>Motiva Vendas — Painel de administração</title>
+<link rel="icon" href="favicon-32.png" sizes="32x32" />
+<style>
+  :root{--c1:#6d28d9;--c2:#2563eb;--accent:#f59e0b;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f1f5f9;
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);min-height:100vh;}
+  .hidden{display:none !important;}
+  button{font-family:var(--font);cursor:pointer;}
+
+  /* Login */
+  .authwrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(150deg,var(--c1),var(--c2));}
+  .authbox{width:100%;max-width:400px;text-align:center;color:#fff;}
+  .authbox .biglogo{width:74px;height:74px;border-radius:20px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;}
+  .authbox h1{font-size:22px;margin:0 0 4px;}
+  .authbox p{opacity:.9;margin:0 0 22px;font-size:14px;}
+  .authcard{background:#fff;color:var(--ink);border-radius:18px;padding:22px 20px;box-shadow:0 24px 60px rgba(0,0,0,.24);text-align:left;}
+  .authcard label{font-size:13px;font-weight:600;display:block;margin-bottom:6px;}
+  .authcard input{width:100%;padding:13px;border:1.5px solid var(--line);border-radius:11px;font-size:16px;font-family:var(--font);margin-bottom:12px;}
+  .authcard input:focus{outline:none;border-color:var(--c1);}
+  .authcard input.code{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700;}
+  .bigbtn{width:100%;border:none;border-radius:11px;padding:14px;font-size:15px;font-weight:700;background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;transition:filter .15s;}
+  .bigbtn:hover{filter:brightness(1.07);}
+  .bigbtn:disabled{opacity:.6;}
+  .linkbtn{background:none;border:none;color:var(--c1);font-weight:600;font-size:13px;margin-top:12px;padding:6px;}
+
+  /* Denied */
+  .denied{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;}
+  .denied .ico{font-size:48px;}
+  .denied h2{margin:0;}
+  .denied p{color:var(--muted);max-width:420px;}
+  .denied button{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 18px;font-weight:600;}
+
+  /* Dashboard */
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+  .top .brand{display:flex;align-items:center;gap:10px;}
+  .top .dot{width:34px;height:34px;border-radius:9px;background:linear-gradient(120deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+  .top b{font-size:16px;}
+  .top .who{margin-left:auto;color:var(--muted);font-size:13px;}
+  .top .out{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:600;font-size:13px;}
+  .container{max-width:1080px;margin:0 auto;padding:22px 20px 60px;}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;}
+  .stat .lbl{color:var(--muted);font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .stat .val{font-size:30px;font-weight:800;margin-top:6px;letter-spacing:-.02em;}
+  .stat .sub{color:var(--muted);font-size:12px;margin-top:2px;}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:22px;}
+  .panel h3{margin:0 0 4px;font-size:16px;}
+  .panel .psub{color:var(--muted);font-size:13px;margin:0 0 16px;}
+  .chart{width:100%;height:180px;}
+  .chart .bar{fill:var(--c1);transition:fill .15s;}
+  .chart .bar:hover{fill:var(--c2);}
+  .chart text{fill:var(--muted);font-size:10px;}
+
+  .sec-head{display:flex;align-items:center;margin-bottom:14px;}
+  .sec-head h3{margin:0;font-size:16px;}
+  .addbtn{margin-left:auto;border:none;background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;border-radius:11px;padding:11px 16px;font-weight:700;font-size:13.5px;}
+
+  .company{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line);}
+  .company:last-child{border-bottom:none;}
+  .clogo{width:44px;height:44px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;overflow:hidden;}
+  .clogo img{width:100%;height:100%;object-fit:cover;}
+  .cinfo{min-width:0;flex:1;}
+  .cinfo .cname{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .badge.on{background:#dcfce7;color:#166534;}
+  .badge.off{background:#fee2e2;color:#991b1b;}
+  .badge.pub{background:#e0e7ff;color:#3730a3;}
+  .key{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#f8fafc;border:1px solid var(--line);border-radius:7px;padding:2px 8px;cursor:pointer;}
+  .cmeta{color:var(--muted);font-size:12.5px;margin-top:3px;}
+  .cact{display:flex;gap:8px;flex:0 0 auto;}
+  .iconbtn{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;font-size:13px;font-weight:600;}
+  .iconbtn:hover{background:#f8fafc;}
+
+  /* Drawer editor */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);background:#fff;z-index:50;transform:translateX(100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25);}
+  .drawer.show{transform:translateX(0);}
+  .dh{background:linear-gradient(120deg,var(--c1),var(--c2));padding:18px 20px;display:flex;align-items:center;gap:10px;}
+  .dh h2{margin:0;color:#fff;font-size:17px;flex:1;}
+  .dh .x{background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:17px;}
+  .db{padding:20px;overflow-y:auto;flex:1;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input[type=text]{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--font);}
+  .field input:focus{outline:none;border-color:var(--c1);}
+  .field .hint{font-size:12px;color:var(--muted);margin-top:5px;}
+  .keyrow{display:flex;gap:8px;}
+  .keyrow input{flex:1;text-transform:uppercase;font-family:ui-monospace,monospace;}
+  .keyrow button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:0 12px;font-weight:600;font-size:12px;}
+  .colors{display:flex;gap:10px;}
+  .colorpick{flex:1;text-align:center;}
+  .colorpick input[type=color]{width:100%;height:42px;border:none;border-radius:10px;background:none;padding:0;cursor:pointer;}
+  .colorpick small{display:block;font-size:11px;color:var(--muted);margin-top:4px;}
+  .logorow{display:flex;align-items:center;gap:12px;}
+  .logoprev{width:56px;height:56px;border-radius:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:22px;flex:0 0 auto;}
+  .logoprev img{width:100%;height:100%;object-fit:cover;}
+  .toggle{display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--line);border-radius:11px;}
+  .toggle input{width:20px;height:20px;}
+  .savebtn{width:100%;border:none;border-radius:11px;padding:14px;font-weight:700;font-size:15px;background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;margin-top:8px;}
+  .btn-line{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px;font-weight:600;margin-top:10px;}
+  input[type=file]{display:none;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:720px){ .cards{grid-template-columns:repeat(2,1fr);} .company{flex-wrap:wrap;} .cact{width:100%;} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="authwrap" id="authScreen">
+  <div class="authbox">
+    <div class="biglogo">🛠️</div>
+    <h1>Painel de administração</h1>
+    <p>Motiva Vendas · acesso restrito</p>
+    <div class="authcard">
+      <div id="stepEmail">
+        <label for="email">E-mail de administrador</label>
+        <input type="email" id="email" placeholder="voce@empresa.com" inputmode="email" />
+        <button class="bigbtn" id="btnSendCode">Receber código</button>
+      </div>
+      <div id="stepCode" class="hidden">
+        <label>Código enviado para <b id="emailEcho"></b></label>
+        <input type="text" id="code" class="code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+        <button class="bigbtn" id="btnVerify">Entrar</button>
+        <button class="linkbtn" id="btnBack">‹ Usar outro e-mail</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DENIED -->
+<div class="denied hidden" id="deniedScreen">
+  <div class="ico">🔒</div>
+  <h2>Acesso restrito</h2>
+  <p>Esta conta não tem permissão de administrador. Se você deveria ter acesso, verifique se entrou com o e-mail correto.</p>
+  <button id="btnLogoutDenied">Sair</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="hidden" id="dash">
+  <div class="top">
+    <div class="brand"><div class="dot">💬</div><b>Motiva Vendas — Admin</b></div>
+    <span class="who" id="whoEmail"></span>
+    <button class="out" id="btnLogout">Sair</button>
+  </div>
+  <div class="container">
+    <div class="cards">
+      <div class="stat"><div class="lbl">Empresas</div><div class="val" id="stCompanies">—</div><div class="sub">licenças cadastradas</div></div>
+      <div class="stat"><div class="lbl">Aberturas hoje</div><div class="val" id="stToday">—</div><div class="sub">acessos no dia</div></div>
+      <div class="stat"><div class="lbl">Usuários ativos</div><div class="val" id="stUsers">—</div><div class="sub">últimos 30 dias</div></div>
+      <div class="stat"><div class="lbl">Aberturas totais</div><div class="val" id="stOpens">—</div><div class="sub">desde o início</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Uso nos últimos 14 dias</h3>
+      <p class="psub">Total de aberturas por dia (todas as empresas).</p>
+      <svg class="chart" id="chart" viewBox="0 0 700 180" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="sec-head">
+        <div><h3>Empresas &amp; licenças</h3></div>
+        <button class="addbtn" id="btnNew">＋ Nova empresa</button>
+      </div>
+      <div id="companyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><h2 id="editorTitle">Nova empresa</h2><button class="x" id="closeEditor">✕</button></div>
+  <div class="db">
+    <div class="field">
+      <label>Nome da empresa</label>
+      <input type="text" id="fName" placeholder="Ex.: Loja Alpha" maxlength="40" />
+    </div>
+    <div class="field">
+      <label>Chave de licença</label>
+      <div class="keyrow">
+        <input type="text" id="fKey" placeholder="EX: LOJA-ALPHA-2026" maxlength="40" />
+        <button id="btnGenKey" type="button">Gerar</button>
+      </div>
+      <div class="hint">É o código que a empresa digita no app para ativar a versão dela. Não pode repetir.</div>
+    </div>
+    <div class="field">
+      <label>Frase / slogan</label>
+      <input type="text" id="fTag" placeholder="Ex.: Bora bater meta!" maxlength="60" />
+    </div>
+    <div class="field">
+      <label>Cores da marca</label>
+      <div class="colors">
+        <div class="colorpick"><input type="color" id="fc1" value="#6d28d9"/><small>Primária</small></div>
+        <div class="colorpick"><input type="color" id="fc2" value="#2563eb"/><small>Secundária</small></div>
+        <div class="colorpick"><input type="color" id="fc3" value="#f59e0b"/><small>Destaque</small></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Logo</label>
+      <div class="logorow">
+        <div class="logoprev" id="logoPrev">💬</div>
+        <button class="iconbtn" id="btnUpload" type="button">Enviar logo</button>
+        <button class="iconbtn" id="btnClearLogo" type="button">Remover</button>
+      </div>
+      <div class="hint">Imagem quadrada; será redimensionada automaticamente.</div>
+      <input type="file" id="fileLogo" accept="image/*" />
+    </div>
+    <div class="field" id="activeField">
+      <div class="toggle"><input type="checkbox" id="fActive" checked /><label for="fActive" style="margin:0">Licença ativa (empresa consegue usar o app)</label></div>
+    </div>
+    <button class="savebtn" id="btnSave">Salvar</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase.js"></script>
+<script>
+"use strict";
+const SB_URL="https://kikfdoifausfladcjcec.supabase.co";
+const SB_KEY="sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+
+let toastTimer;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
+
+/* ===== Login ===== */
+let loginEmail="";
+$("btnSendCode").onclick=async()=>{
+  const email=$("email").value.trim();
+  if(!email||!email.includes("@")){ toast("Digite um e-mail válido"); return; }
+  const b=$("btnSendCode"); b.disabled=true; b.textContent="Enviando…";
+  const { error }=await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
+  b.disabled=false; b.textContent="Receber código";
+  if(error){ toast("Erro ao enviar código"); return; }
+  loginEmail=email; $("emailEcho").textContent=email;
+  $("stepEmail").classList.add("hidden"); $("stepCode").classList.remove("hidden"); $("code").focus();
+  toast("📧 Código enviado!");
+};
+$("btnVerify").onclick=async()=>{
+  const token=$("code").value.trim();
+  if(token.length<6){ toast("Digite os 6 dígitos"); return; }
+  const b=$("btnVerify"); b.disabled=true; b.textContent="Entrando…";
+  const { error }=await sb.auth.verifyOtp({ email:loginEmail, token, type:"email" });
+  b.disabled=false; b.textContent="Entrar";
+  if(error){ toast("Código inválido ou expirado"); }
+};
+$("btnBack").onclick=()=>{ $("stepCode").classList.add("hidden"); $("stepEmail").classList.remove("hidden"); };
+$("email").addEventListener("keydown",e=>{ if(e.key==="Enter")$("btnSendCode").click(); });
+$("code").addEventListener("keydown",e=>{ if(e.key==="Enter")$("btnVerify").click(); });
+
+/* ===== Sessão / permissão ===== */
+function show(el){ ["authScreen","deniedScreen","dash"].forEach(id=>$(id).classList.add("hidden")); $(el).classList.remove("hidden"); }
+sb.auth.onAuthStateChange((_e,session)=>{ route(session); });
+(async()=>{ const { data }=await sb.auth.getSession(); route(data.session); })();
+
+async function route(session){
+  if(!session||!session.user){ show("authScreen"); return; }
+  const { data, error }=await sb.rpc("is_admin");
+  if(error){ toast("Falha ao verificar permissão"); show("authScreen"); return; }
+  if(data===true){ $("whoEmail").textContent=session.user.email; show("dash"); loadDash(); }
+  else { show("deniedScreen"); }
+}
+$("btnLogout").onclick=async()=>{ await sb.auth.signOut(); show("authScreen"); };
+$("btnLogoutDenied").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+
+/* ===== Dashboard ===== */
+async function loadDash(){ await Promise.all([loadStats(), loadChart(), loadCompanies()]); }
+
+async function loadStats(){
+  const { data, error }=await sb.rpc("admin_stats");
+  if(error||!data||!data.length) return;
+  const s=data[0];
+  $("stCompanies").textContent=s.companies;
+  $("stToday").textContent=s.opens_today;
+  $("stUsers").textContent=s.users30;
+  $("stOpens").textContent=s.opens;
+}
+
+async function loadChart(){
+  const { data, error }=await sb.rpc("admin_usage_series",{ p_days:14 });
+  const svg=$("chart"); svg.innerHTML="";
+  if(error||!data) return;
+  const W=700,H=180,pad=24, n=data.length;
+  const max=Math.max(1,...data.map(d=>Number(d.opens)));
+  const bw=(W-pad*2)/n*0.62, gap=(W-pad*2)/n;
+  data.forEach((d,i)=>{
+    const val=Number(d.opens);
+    const h=(H-pad*2)*(val/max);
+    const x=pad+i*gap+(gap-bw)/2, y=H-pad-h;
+    const r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    r.setAttribute("class","bar"); r.setAttribute("x",x.toFixed(1)); r.setAttribute("y",y.toFixed(1));
+    r.setAttribute("width",bw.toFixed(1)); r.setAttribute("height",Math.max(h,1).toFixed(1)); r.setAttribute("rx","3");
+    const ttl=document.createElementNS("http://www.w3.org/2000/svg","title");
+    const dt=new Date(d.d+"T12:00:00"); ttl.textContent=dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})+": "+val;
+    r.appendChild(ttl); svg.appendChild(r);
+    if(i%2===0||i===n-1){
+      const t=document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.setAttribute("x",(x+bw/2).toFixed(1)); t.setAttribute("y",H-8); t.setAttribute("text-anchor","middle");
+      t.textContent=dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}); svg.appendChild(t);
+    }
+  });
+}
+
+function initialsColor(name){ return name?name.trim().charAt(0).toUpperCase():"?"; }
+async function loadCompanies(){
+  const { data, error }=await sb.rpc("admin_list_companies");
+  const box=$("companyList"); box.innerHTML="";
+  if(error){ box.innerHTML="<p style='color:var(--muted)'>Não foi possível carregar.</p>"; return; }
+  data.forEach(c=>{
+    const isPub=c.license_key==="PUBLICO";
+    const row=document.createElement("div"); row.className="company";
+    const last = c.last_open ? new Date(c.last_open).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"}) : "—";
+    row.innerHTML=`
+      <div class="clogo" style="background:linear-gradient(120deg,${c.c1},${c.c2})">${c.logo_url?`<img src="${c.logo_url}"/>`:initialsColor(c.name)}</div>
+      <div class="cinfo">
+        <div class="cname">${escapeHtml(c.name)}
+          ${isPub?'<span class="badge pub">Pública</span>':(c.active?'<span class="badge on">Ativa</span>':'<span class="badge off">Inativa</span>')}
+        </div>
+        <div class="cmeta">
+          <span class="key" title="Copiar chave" data-key="${c.license_key}">${c.license_key}</span>
+          &nbsp;·&nbsp; ${c.opens} aberturas · ${c.users} usuários · último: ${last}
+        </div>
+      </div>
+      <div class="cact">
+        <button class="iconbtn" data-edit="${c.id}">✏️ Editar</button>
+      </div>`;
+    box.appendChild(row);
+  });
+  box.querySelectorAll(".key").forEach(el=>el.onclick=()=>{ navigator.clipboard.writeText(el.dataset.key).then(()=>toast("Chave copiada: "+el.dataset.key)).catch(()=>{}); });
+  box.querySelectorAll("[data-edit]").forEach(el=>el.onclick=()=>openEditor(data.find(x=>x.id===el.dataset.edit)));
+}
+function escapeHtml(s){ return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ===== Editor ===== */
+const overlay=$("overlay"), drawer=$("drawer");
+let editing=null, pendingLogo=undefined; // undefined = não mexeu; null = remover; string = novo
+function openEditor(company){
+  editing=company||null; pendingLogo=undefined;
+  $("editorTitle").textContent=company?"Editar empresa":"Nova empresa";
+  $("fName").value=company?company.name:"";
+  $("fKey").value=company?company.license_key:"";
+  $("fKey").disabled=!!company; // não deixa mudar a chave depois de criada
+  $("fTag").value=company?(company.tagline||""):"";
+  $("fc1").value=company?company.c1:"#6d28d9";
+  $("fc2").value=company?company.c2:"#2563eb";
+  $("fc3").value=company?company.c3:"#f59e0b";
+  $("logoPrev").innerHTML=company&&company.logo_url?`<img src="${company.logo_url}"/>`:"💬";
+  const isPub=company&&company.license_key==="PUBLICO";
+  $("fActive").checked=company?company.active:true;
+  $("activeField").style.display=isPub?"none":"block"; // pública sempre ativa
+  drawer.classList.add("show"); overlay.classList.add("show");
+}
+function closeEditor(){ drawer.classList.remove("show"); overlay.classList.remove("show"); }
+$("closeEditor").onclick=closeEditor; overlay.onclick=closeEditor;
+
+$("btnGenKey").onclick=()=>{
+  const base=($("fName").value||"empresa").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const year=new Date().getFullYear();
+  $("fKey").value=(base||"EMPRESA")+"-"+year;
+};
+$("btnUpload").onclick=()=>$("fileLogo").click();
+$("fileLogo").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image(); const rd=new FileReader();
+  rd.onload=ev=>{ img.onload=()=>{
+    const size=256, cv=document.createElement("canvas"); cv.width=size; cv.height=size;
+    const ctx=cv.getContext("2d");
+    const s=Math.min(img.width,img.height), sx=(img.width-s)/2, sy=(img.height-s)/2;
+    ctx.drawImage(img,sx,sy,s,s,0,0,size,size);
+    pendingLogo=cv.toDataURL("image/png"); $("logoPrev").innerHTML=`<img src="${pendingLogo}"/>`;
+  }; img.src=ev.target.result; };
+  rd.readAsDataURL(f);
+};
+$("btnClearLogo").onclick=()=>{ pendingLogo=null; $("logoPrev").innerHTML="💬"; };
+
+$("btnSave").onclick=async()=>{
+  const name=$("fName").value.trim(), key=$("fKey").value.trim();
+  if(!name){ toast("Informe o nome"); return; }
+  const b=$("btnSave"); b.disabled=true; b.textContent="Salvando…";
+  try{
+    if(!editing){
+      if(!key){ toast("Informe a chave"); b.disabled=false; b.textContent="Salvar"; return; }
+      const { data, error }=await sb.rpc("admin_create_company",{
+        p_name:name, p_key:key, p_tagline:$("fTag").value.trim(),
+        p_c1:$("fc1").value, p_c2:$("fc2").value, p_c3:$("fc3").value,
+        p_logo: (pendingLogo===undefined?null:pendingLogo)
+      });
+      if(error) throw error;
+      toast("✅ Empresa criada");
+    } else {
+      const { error }=await sb.rpc("admin_update_company",{
+        p_id:editing.id, p_name:name, p_tagline:$("fTag").value.trim(),
+        p_c1:$("fc1").value, p_c2:$("fc2").value, p_c3:$("fc3").value,
+        p_active: (editing.license_key==="PUBLICO")?true:$("fActive").checked
+      });
+      if(error) throw error;
+      if(pendingLogo!==undefined){
+        const r=await sb.rpc("admin_set_logo",{ p_id:editing.id, p_logo:pendingLogo });
+        if(r.error) throw r.error;
+      }
+      toast("✅ Alterações salvas");
+    }
+    closeEditor(); await loadDash();
+  }catch(err){
+    const m=(err.message||"")+(err.details||"");
+    if(/duplicate|unique|already exists/i.test(m)) toast("Essa chave de licença já existe");
+    else if(/empty_name/.test(m)) toast("Informe o nome");
+    else if(/empty_key/.test(m)) toast("Informe a chave");
+    else toast("Erro ao salvar");
+  }
+  b.disabled=false; b.textContent="Salvar";
+};
+$("btnNew").onclick=()=>openEditor(null);
+</script>
+</body>
+</html>

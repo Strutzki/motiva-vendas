@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#6d28d9" />
+<title>Motiva Vendas — Mensagem do dia</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Motiva Vendas" />
+<style>
+  :root{
+    --c1:#6d28d9; --c2:#2563eb; --accent:#f59e0b;
+    --ink:#111827; --muted:#6b7280; --card:#fff;
+    --radius:22px;
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--font);color:var(--ink);min-height:100vh;min-height:100dvh;
+    background:linear-gradient(150deg,var(--c1),var(--c2));background-attachment:fixed;
+    display:flex;flex-direction:column;align-items:center;
+    padding:env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom));}
+  .wrap{width:100%;max-width:620px;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;}
+  .hidden{display:none !important;}
+
+  /* ===== Tela de login ===== */
+  .auth{width:100%;max-width:420px;margin:auto;color:#fff;text-align:center;padding:24px 6px;}
+  .auth .biglogo{width:80px;height:80px;border-radius:22px;background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 18px;overflow:hidden;}
+  .auth h1{font-size:24px;margin:0 0 6px;}
+  .auth p{opacity:.9;margin:0 0 26px;font-size:14px;line-height:1.5;}
+  .authcard{background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 24px 60px rgba(0,0,0,.24);
+    color:var(--ink);text-align:left;}
+  .authcard label{font-size:13px;font-weight:600;display:block;margin-bottom:7px;}
+  .authcard input{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:16px;
+    font-family:var(--font);margin-bottom:14px;}
+  .authcard input:focus{outline:none;border-color:var(--c1);}
+  .authcard input.code{letter-spacing:.4em;text-align:center;font-size:22px;font-weight:700;}
+  .bigbtn{width:100%;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;
+    background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;font-family:var(--font);transition:filter .15s;}
+  .bigbtn:hover{filter:brightness(1.07);}
+  .bigbtn:disabled{opacity:.6;cursor:default;}
+  .linkbtn{background:none;border:none;color:var(--c1);font-weight:600;cursor:pointer;font-size:13px;
+    margin-top:14px;font-family:var(--font);padding:6px;}
+  .authhint{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5;}
+
+  /* ===== App ===== */
+  header{display:flex;align-items:center;gap:12px;padding:18px 4px 10px;color:#fff;}
+  .logo{width:44px;height:44px;border-radius:12px;object-fit:cover;background:rgba(255,255,255,.18);
+        display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;overflow:hidden;}
+  .brand{display:flex;flex-direction:column;line-height:1.1;min-width:0;}
+  .brand b{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .brand span{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gear{margin-left:auto;background:rgba(255,255,255,.16);border:none;color:#fff;width:40px;height:40px;
+        border-radius:12px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .gear:hover{background:rgba(255,255,255,.28);}
+  .streak{display:flex;align-items:center;gap:6px;color:#fff;font-size:13px;opacity:.92;padding:2px 4px 8px;font-weight:500;}
+
+  .card{background:var(--card);border-radius:var(--radius);padding:30px 26px 26px;
+        box-shadow:0 24px 60px rgba(0,0,0,.22);position:relative;overflow:hidden;}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;
+        background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));}
+  .tagchip{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--c1) 12%,#fff);
+        color:var(--c1);font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;margin-bottom:16px;}
+  .quotemark{font-size:52px;line-height:0;color:color-mix(in srgb,var(--c1) 35%,#fff);font-family:Georgia,serif;height:24px;display:block;}
+  .msg{font-size:23px;line-height:1.42;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:6px 0 4px;min-height:120px;transition:opacity .2s;}
+  .msg.small{font-size:20px;}
+  .datlabel{color:var(--muted);font-size:13px;margin-top:16px;}
+  .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+  .act{flex:1;min-width:0;border:none;border-radius:14px;padding:13px 10px;font-size:14px;font-weight:600;cursor:pointer;
+       display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .08s,filter .15s;}
+  .act:active{transform:scale(.97);}
+  .act.primary{background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;}
+  .act.primary:hover{filter:brightness(1.07);}
+  .act.ghost{background:#f3f4f6;color:var(--ink);flex:0 0 auto;width:52px;}
+  .act.ghost:hover{background:#e5e7eb;}
+  .act.wpp{background:#25D366;color:#fff;box-shadow:0 8px 20px rgba(37,211,102,.35);}
+  .act.wpp:hover{filter:brightness(1.05);}
+  .act.wpp svg{width:20px;height:20px;fill:currentColor;flex:0 0 auto;}
+  .segbar{margin-top:22px;display:flex;flex-direction:column;gap:8px;}
+  .segbar label{font-size:12px;font-weight:600;color:#fff;opacity:.9;padding-left:4px;}
+  select{flex:1;appearance:none;background:#fff;border:none;border-radius:14px;padding:14px 16px;font-size:15px;
+         font-family:var(--font);color:var(--ink);font-weight:500;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.12);
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%236b7280' stroke-width='2'><path d='M5 8l5 5 5-5'/></svg>");
+         background-repeat:no-repeat;background-position:right 14px center;width:100%;}
+  .installbtn{display:none;margin:22px auto 0;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);
+        color:#fff;font-weight:600;font-size:14px;padding:12px 22px;border-radius:14px;cursor:pointer;transition:background .15s;font-family:var(--font);}
+  .installbtn:hover{background:rgba(255,255,255,.28);}
+  .installbtn.show{display:block;}
+  .foot{margin-top:auto;padding:22px 4px 6px;text-align:center;color:rgba(255,255,255,.75);font-size:12px;}
+  .foot b{font-weight:600;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;
+         padding:12px 20px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:all .25s;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:#fff;z-index:50;transform:translateX(100%);
+          transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25);}
+  .drawer.show{transform:translateX(0);}
+  .drawer .dh{background:linear-gradient(120deg,var(--c1),var(--c2));padding:20px;display:flex;align-items:center;gap:10px;}
+  .drawer .dh h2{margin:0;color:#fff;font-size:18px;flex:1;}
+  .drawer .close{background:rgba(255,255,255,.2);border:none;color:#fff;width:34px;height:34px;border-radius:10px;font-size:18px;cursor:pointer;}
+  .dbody{padding:22px;overflow-y:auto;flex:1;}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef0f3;font-size:14px;}
+  .row .k{color:var(--muted);}
+  .row .v{font-weight:600;text-align:right;}
+  .field{margin:20px 0;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:7px;}
+  .field input{width:100%;padding:12px;border:1.5px solid #e5e7eb;border-radius:11px;font-size:14px;font-family:var(--font);text-transform:uppercase;}
+  .field input:focus{outline:none;border-color:var(--c1);}
+  .field .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  .btn{border:none;border-radius:11px;padding:12px 15px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:filter .15s,background .15s;width:100%;}
+  .btn.fill{background:linear-gradient(120deg,var(--c1),var(--c2));color:#fff;}
+  .btn.fill:hover{filter:brightness(1.08);}
+  .btn.line{background:#fff;border:1.5px solid #e5e7eb;color:var(--ink);margin-top:24px;}
+  .btn.line:hover{background:#f9fafb;}
+  @media (max-width:420px){ .msg{font-size:21px;} .card{padding:26px 20px 22px;} }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div class="auth" id="authScreen">
+  <div class="biglogo" id="authLogo">💬</div>
+  <h1>Motiva Vendas</h1>
+  <p>Sua dose diária de motivação para vender mais.<br/>Entre com seu e-mail para começar.</p>
+  <div class="authcard">
+    <!-- passo 1: e-mail -->
+    <div id="stepEmail">
+      <label for="email">Seu e-mail</label>
+      <input type="email" id="email" placeholder="voce@empresa.com" autocomplete="email" inputmode="email" />
+      <button class="bigbtn" id="btnSendCode">Receber código de acesso</button>
+      <div class="authhint">Enviaremos um código de 6 dígitos para o seu e-mail. Se preferir, o e-mail também traz um link de acesso — é só tocar nele.</div>
+    </div>
+    <!-- passo 2: código -->
+    <div id="stepCode" class="hidden">
+      <label for="code">Código enviado para <b id="emailEcho"></b></label>
+      <input type="text" id="code" class="code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
+      <button class="bigbtn" id="btnVerify">Entrar</button>
+      <button class="linkbtn" id="btnBack">‹ Usar outro e-mail</button>
+      <button class="linkbtn" id="btnResend">Reenviar código</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div class="wrap hidden" id="app">
+  <header>
+    <div class="logo" id="logoBox">💬</div>
+    <div class="brand">
+      <b id="brandName">Motiva Vendas</b>
+      <span id="brandTag">Sua dose diária de motivação</span>
+    </div>
+    <button class="gear" id="openSettings" title="Minha conta">👤</button>
+  </header>
+
+  <div class="streak" id="streak"></div>
+
+  <main class="card">
+    <span class="tagchip" id="segTag">✨ Geral</span>
+    <span class="quotemark">“</span>
+    <div class="msg" id="message">Carregando…</div>
+    <div class="datlabel" id="dateLabel"></div>
+
+    <div class="actions">
+      <button class="act primary" id="btnDaily">📅 Mensagem do dia</button>
+      <button class="act primary" id="btnRandom" style="background:linear-gradient(120deg,var(--accent),var(--c1));">🎲 Aleatória</button>
+    </div>
+    <div class="actions">
+      <button class="act wpp" id="btnWhats">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.523 5.26l-.999 3.648 3.464-.909zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        Encaminhar no WhatsApp
+      </button>
+    </div>
+    <div class="actions">
+      <button class="act ghost" id="btnCopy" title="Copiar">📋</button>
+      <button class="act ghost" id="btnShare" title="Compartilhar">📤</button>
+      <button class="act ghost" id="btnFav" title="Favoritar" style="flex:1;width:auto;">⭐ Favoritar</button>
+    </div>
+
+    <div class="segbar">
+      <label for="segSelect">Personalize pelo seu segmento</label>
+      <select id="segSelect"></select>
+    </div>
+  </main>
+
+  <button id="installBtn" class="installbtn">📲 Instalar app no celular</button>
+
+  <div class="foot">
+    <b id="footBrand">Motiva Vendas</b> · mensagem nova todo dia 💪<br/>
+    <span style="opacity:.8">Toque em 👤 para sua conta e licença da empresa</span>
+  </div>
+</div>
+
+<!-- ===================== CONTA ===================== -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh">
+    <h2>Minha conta</h2>
+    <button class="close" id="closeSettings">✕</button>
+  </div>
+  <div class="dbody">
+    <div class="row"><span class="k">E-mail</span><span class="v" id="accEmail">—</span></div>
+    <div class="row"><span class="k">Empresa</span><span class="v" id="accCompany">—</span></div>
+
+    <div class="field">
+      <label>Chave de licença da empresa</label>
+      <input type="text" id="licenseKey" placeholder="EX: EMPRESA-2026" />
+      <button class="btn fill" id="btnApplyLicense" style="margin-top:10px">Aplicar licença</button>
+      <div class="hint">Recebeu uma chave da sua empresa? Digite aqui para ativar as cores, o logo e o acompanhamento da equipe. Sem chave, você usa a versão livre.</div>
+    </div>
+
+    <button class="btn line" id="btnLogout">Sair da conta</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase.js"></script>
+<script>
+"use strict";
+
+/* ===== CONFIGURAÇÃO DO BACKEND (chave pública — segura no cliente) ===== */
+const SB_URL = "https://kikfdoifausfladcjcec.supabase.co";
+const SB_KEY = "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+const sb = window.supabase.createClient(SB_URL, SB_KEY, {
+  auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+});
+
+/* ===== Armazenamento seguro (localStorage com fallback) ===== */
+const mem={}; const store={
+  get(k){ try{return localStorage.getItem(k);}catch(e){return k in mem?mem[k]:null;} },
+  set(k,v){ try{localStorage.setItem(k,v);}catch(e){mem[k]=v;} },
+  del(k){ try{localStorage.removeItem(k);}catch(e){delete mem[k];} }
+};
+
+/* ===== Elementos ===== */
+const $=id=>document.getElementById(id);
+const authScreen=$("authScreen"), appEl=$("app");
+const SEGMENTS=[
+  ["geral","✨ Geral (todos os segmentos)"],["varejo","🛍️ Varejo / Loja"],["imobiliario","🏠 Imobiliário"],
+  ["seguros","🛡️ Seguros / Financeiro"],["automoveis","🚗 Automóveis / Concessionária"],["tecnologia","💻 Tecnologia / SaaS"],
+  ["saude","⚕️ Farmacêutico / Saúde"],["telecom","📡 Telecom / Assinaturas"],["agro","🌾 Agronegócio"],
+  ["servicos","🤝 Serviços / Consultoria"],["moda","👗 Moda / Beleza"]
+];
+let currentSeg = store.get("mv_seg") || "geral";
+let currentText = "";
+let currentEmail = "";
+let recent = [];
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
+
+/* ===== LOGIN ===== */
+$("btnSendCode").onclick=async()=>{
+  const email=$("email").value.trim();
+  if(!email || !email.includes("@")){ toast("Digite um e-mail válido"); return; }
+  const b=$("btnSendCode"); b.disabled=true; b.textContent="Enviando…";
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
+  b.disabled=false; b.textContent="Receber código de acesso";
+  if(error){ toast("Erro: "+traduz(error.message)); return; }
+  currentEmail=email; $("emailEcho").textContent=email;
+  $("stepEmail").classList.add("hidden"); $("stepCode").classList.remove("hidden");
+  $("code").focus();
+  toast("📧 Código enviado! Verifique seu e-mail.");
+};
+$("btnResend").onclick=()=>{ $("stepCode").classList.add("hidden"); $("stepEmail").classList.remove("hidden"); $("btnSendCode").click(); };
+$("btnBack").onclick=()=>{ $("stepCode").classList.add("hidden"); $("stepEmail").classList.remove("hidden"); };
+$("btnVerify").onclick=async()=>{
+  const token=$("code").value.trim();
+  if(token.length<6){ toast("Digite o código de 6 dígitos"); return; }
+  const b=$("btnVerify"); b.disabled=true; b.textContent="Entrando…";
+  const { error } = await sb.auth.verifyOtp({ email: currentEmail, token, type:"email" });
+  b.disabled=false; b.textContent="Entrar";
+  if(error){ toast("Código inválido ou expirado"); return; }
+  // onAuthStateChange cuida de entrar no app
+};
+$("code").addEventListener("keydown",e=>{ if(e.key==="Enter") $("btnVerify").click(); });
+$("email").addEventListener("keydown",e=>{ if(e.key==="Enter") $("btnSendCode").click(); });
+
+function traduz(msg){
+  if(/rate|limit|too many/i.test(msg)) return "muitas tentativas, aguarde alguns minutos";
+  if(/valid email/i.test(msg)) return "e-mail inválido";
+  return msg;
+}
+
+/* ===== Sessão ===== */
+sb.auth.onAuthStateChange((event, session)=>{
+  if(session && session.user){ enterApp(session.user); }
+  else { showAuth(); }
+});
+(async()=>{ const { data } = await sb.auth.getSession(); if(data.session) enterApp(data.session.user); else showAuth(); })();
+
+function showAuth(){ appEl.classList.add("hidden"); authScreen.classList.remove("hidden"); }
+function enterApp(user){
+  currentEmail = user.email || currentEmail;
+  authScreen.classList.add("hidden"); appEl.classList.remove("hidden");
+  $("accEmail").textContent = currentEmail;
+  fillSegments(); updateStreak();
+  loadBranding().then(()=>showDaily());
+}
+
+/* ===== Segmentos ===== */
+function fillSegments(){
+  const sel=$("segSelect"); sel.innerHTML="";
+  SEGMENTS.forEach(([id,label])=>{ const o=document.createElement("option"); o.value=id; o.textContent=label; sel.appendChild(o); });
+  sel.value=currentSeg;
+}
+function segLabel(id){ const s=SEGMENTS.find(x=>x[0]===id); return s?s[1]:"✨ Geral"; }
+
+/* ===== Branding (cores/logo da empresa, vindo do servidor) ===== */
+async function loadBranding(){
+  const { data, error } = await sb.rpc("get_branding");
+  if(error || !data || !data.length){ return; }
+  const b=data[0];
+  const r=document.documentElement.style;
+  if(b.c1) r.setProperty("--c1",b.c1);
+  if(b.c2) r.setProperty("--c2",b.c2);
+  if(b.c3) r.setProperty("--accent",b.c3);
+  document.querySelector('meta[name=theme-color]').setAttribute("content", b.c1||"#6d28d9");
+  $("brandName").textContent=b.company_name||"Motiva Vendas";
+  $("footBrand").textContent=b.company_name||"Motiva Vendas";
+  $("brandTag").textContent=b.tagline||"Sua dose diária de motivação";
+  $("accCompany").textContent=b.company_name + (b.is_public?" (livre)":"");
+  const lb=$("logoBox");
+  if(b.logo_url){ lb.innerHTML='<img src="'+b.logo_url+'" style="width:100%;height:100%;object-fit:cover"/>'; }
+  else { lb.textContent="💬"; }
+}
+
+/* ===== Render ===== */
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function fmtDate(){ return new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}); }
+function render(text, isDaily){
+  const el=$("message"); el.style.opacity=0;
+  setTimeout(()=>{
+    currentText=text; el.textContent=text; el.classList.toggle("small",text.length>140); el.style.opacity=1;
+    $("segTag").textContent=segLabel(currentSeg);
+    $("dateLabel").textContent=isDaily?("— "+capitalize(fmtDate())):"— mensagem aleatória";
+  },160);
+}
+
+async function showDaily(){
+  $("message").style.opacity=.4;
+  const { data, error } = await sb.rpc("get_daily_message", { p_segment: currentSeg });
+  if(error){ handleRpcError(error, true); return; }
+  const m=data[0];
+  render(m.message, true);
+  store.set("mv_cache_"+currentSeg, JSON.stringify({d:new Date().toDateString(), t:m.message}));
+}
+async function showRandom(){
+  $("message").style.opacity=.4;
+  const { data, error } = await sb.rpc("get_random_message", { p_segment: currentSeg });
+  if(error){ handleRpcError(error, false); return; }
+  let text=data[0].message, tries=0;
+  while(recent.includes(text) && tries<6){ const r=await sb.rpc("get_random_message",{p_segment:currentSeg}); if(r.error)break; text=r.data[0].message; tries++; }
+  recent.push(text); if(recent.length>20) recent.shift();
+  render(text, false);
+}
+function handleRpcError(error, isDaily){
+  const msg=(error.message||"")+(error.details||"");
+  if(/license_inactive/.test(msg)){ toast("Licença da empresa inativa. Fale com o administrador."); }
+  else if(/no_company|no_messages/.test(msg)){ toast("Não foi possível carregar. Tente novamente."); }
+  else if(/JWT|auth|401/i.test(msg)){ toast("Sessão expirada. Entre novamente."); showAuth(); return; }
+  else { // offline? usa cache
+    const c=store.get("mv_cache_"+currentSeg);
+    if(c){ try{ const o=JSON.parse(c); render(o.t, isDaily); toast("📴 Sem conexão — mostrando a última mensagem."); return; }catch(e){} }
+    toast("Sem conexão no momento.");
+  }
+  $("message").style.opacity=1;
+}
+
+/* ===== Ações ===== */
+$("btnDaily").onclick=showDaily;
+$("btnRandom").onclick=showRandom;
+$("segSelect").onchange=e=>{ currentSeg=e.target.value; store.set("mv_seg",currentSeg); showDaily(); };
+
+async function copyMsg(){
+  const txt=currentText+"\n\n— "+$("brandName").textContent;
+  try{ await navigator.clipboard.writeText(txt); toast("📋 Copiado!"); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");toast("📋 Copiado!");}catch(_){toast("Não foi possível copiar");} document.body.removeChild(ta); }
+}
+$("btnCopy").onclick=copyMsg;
+$("btnShare").onclick=async()=>{ const txt=currentText+"\n\n— "+$("brandName").textContent; if(navigator.share){try{await navigator.share({text:txt});}catch(e){}}else copyMsg(); };
+$("btnWhats").onclick=()=>{ const txt=currentText+"\n\n💪 "+$("brandName").textContent; window.open("https://wa.me/?text="+encodeURIComponent(txt),"_blank"); };
+$("btnFav").onclick=()=>{ let favs=[]; try{favs=JSON.parse(store.get("mv_favs")||"[]");}catch(e){} if(!favs.includes(currentText)){favs.unshift(currentText); if(favs.length>50)favs.pop(); store.set("mv_favs",JSON.stringify(favs)); toast("⭐ Favoritada!");} else toast("Já está nos favoritos"); };
+
+/* ===== Streak ===== */
+function updateStreak(){
+  const today=Math.floor(Date.now()/86400000);
+  let last=parseInt(store.get("mv_lastDay")||"0",10), count=parseInt(store.get("mv_streak")||"0",10);
+  if(last===today){} else if(last===today-1){count+=1;} else {count=1;}
+  store.set("mv_lastDay",String(today)); store.set("mv_streak",String(count));
+  $("streak").textContent = count>1 ? ("🔥 "+count+" dias seguidos de motivação!") : "🔥 Comece hoje sua sequência!";
+}
+
+/* ===== Conta / Licença ===== */
+const drawer=$("drawer"), overlay=$("overlay");
+$("openSettings").onclick=()=>{ drawer.classList.add("show"); overlay.classList.add("show"); };
+$("closeSettings").onclick=()=>{ drawer.classList.remove("show"); overlay.classList.remove("show"); };
+overlay.onclick=()=>{ drawer.classList.remove("show"); overlay.classList.remove("show"); };
+$("btnApplyLicense").onclick=async()=>{
+  const key=$("licenseKey").value.trim();
+  if(!key){ toast("Digite a chave da licença"); return; }
+  const { data, error } = await sb.rpc("redeem_license", { p_key: key });
+  if(error){ toast(/invalid_license/.test((error.message||"")+(error.details||""))?"Chave inválida ou inativa":"Erro ao aplicar chave"); return; }
+  toast("✅ Licença ativada: "+data[0].company_name);
+  $("licenseKey").value="";
+  await loadBranding(); showDaily();
+};
+$("btnLogout").onclick=async()=>{ await sb.auth.signOut(); recent=[]; drawer.classList.remove("show"); overlay.classList.remove("show"); showAuth(); };
+
+/* ===== PWA ===== */
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+const installBtn=$("installBtn"); let deferredPrompt=null;
+const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt=e; if(!isStandalone) installBtn.classList.add("show"); });
+window.addEventListener("appinstalled",()=>{ installBtn.classList.remove("show"); toast("✅ App instalado!"); });
+installBtn.onclick=async()=>{
+  if(deferredPrompt){ deferredPrompt.prompt(); try{await deferredPrompt.userChoice;}catch(e){} deferredPrompt=null; installBtn.classList.remove("show"); }
+  else if(isiOS){ toast("No iPhone: toque em Compartilhar ⬆️ e 'Adicionar à Tela de Início'"); }
+};
+if(isiOS && !isStandalone){ installBtn.textContent="📲 Como instalar no iPhone"; installBtn.classList.add("show"); }
+</script>
+</body>
+</html>
