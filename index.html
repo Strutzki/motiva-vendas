@@ -11,12 +11,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Motiva Vendas" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root{
     --c1:#6d28d9; --c2:#2563eb; --accent:#f59e0b;
     --ink:#111827; --muted:#6b7280; --card:#fff;
     --radius:22px;
     --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --brandfont:'Poppins','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -31,7 +33,7 @@
   .auth{width:100%;max-width:420px;margin:auto;color:#fff;text-align:center;padding:24px 6px;}
   .auth .biglogo{width:80px;height:80px;border-radius:22px;background:rgba(255,255,255,.16);
     display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 18px;overflow:hidden;}
-  .auth h1{font-size:24px;margin:0 0 6px;}
+  .auth h1{font-size:24px;margin:0 0 6px;font-family:var(--brandfont);font-weight:800;letter-spacing:-.01em;}
   .auth p{opacity:.9;margin:0 0 6px;font-size:14px;line-height:1.5;}
   .authcard{background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 24px 60px rgba(0,0,0,.24);
     color:var(--ink);text-align:center;margin-top:22px;}
@@ -48,7 +50,7 @@
   .logo{width:44px;height:44px;border-radius:12px;object-fit:cover;background:rgba(255,255,255,.18);
         display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;overflow:hidden;}
   .brand{display:flex;flex-direction:column;line-height:1.1;min-width:0;}
-  .brand b{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .brand b{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--brandfont);letter-spacing:-.01em;}
   .brand span{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gear{margin-left:auto;background:rgba(255,255,255,.16);border:none;color:#fff;width:40px;height:40px;
         border-radius:12px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
@@ -126,7 +128,7 @@
 
 <!-- ===================== CARREGAMENTO ===================== -->
 <div class="auth" id="loadingScreen">
-  <div class="biglogo">💬</div>
+  <div class="biglogo"><svg viewBox="0 0 240 240" width="48" height="48"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg></div>
   <h1>Motiva Vendas</h1>
   <p id="loadMsg">Preparando sua dose diária de motivação…</p>
   <div class="spinner" id="spin"></div>
@@ -141,7 +143,7 @@
 <!-- ===================== APP ===================== -->
 <div class="wrap hidden" id="app">
   <header>
-    <div class="logo" id="logoBox">💬</div>
+    <div class="logo" id="logoBox"><svg viewBox="0 0 240 240" width="30" height="30"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg></div>
     <div class="brand">
       <b id="brandName">Motiva Vendas</b>
       <span id="brandTag">Sua dose diária de motivação</span>
@@ -299,7 +301,7 @@ async function loadBranding(){
   $("accCompany").textContent=(b.company_name||"Motiva Vendas") + (b.is_public?" (livre)":"");
   const lb=$("logoBox");
   if(b.logo_url){ lb.innerHTML='<img src="'+b.logo_url+'" style="width:100%;height:100%;object-fit:cover"/>'; }
-  else { lb.textContent="💬"; }
+  else { lb.innerHTML='<svg viewBox="0 0 240 240" width="30" height="30"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>'; }
 }
 
 /* ===== Render ===== */
