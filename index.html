@@ -148,7 +148,6 @@
   <div class="streak" id="streak"></div>
 
   <main class="card">
-    <span class="tagchip" id="segTag">✨ Geral</span>
     <span class="quotemark">“</span>
     <div class="msg" id="message">Carregando…</div>
     <div class="datlabel" id="dateLabel"></div>
@@ -308,7 +307,6 @@ function render(text, isDaily){
   const el=$("message"); el.style.opacity=0;
   setTimeout(()=>{
     currentText=text; el.textContent=text; el.classList.toggle("small",text.length>140); el.style.opacity=1;
-    $("segTag").textContent=segLabel(currentSeg);
     $("dateLabel").textContent=isDaily?("— "+capitalize(fmtDate())):"";
   },160);
 }
