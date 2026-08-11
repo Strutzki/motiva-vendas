@@ -131,12 +131,10 @@
       <div id="stepEmail">
         <label for="email">E-mail de administrador</label>
         <input type="email" id="email" placeholder="voce@empresa.com" inputmode="email" />
-        <button class="bigbtn" id="btnSendCode">Receber código</button>
+        <button class="bigbtn" id="btnSendCode">Receber link de acesso</button>
       </div>
-      <div id="stepCode" class="hidden">
-        <label>Código enviado para <b id="emailEcho"></b></label>
-        <input type="text" id="code" class="code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
-        <button class="bigbtn" id="btnVerify">Entrar</button>
+      <div id="stepLink" class="hidden">
+        <p style="font-size:14px;line-height:1.5;margin:0 0 14px">Enviamos um <b>link de acesso</b> para <b id="emailEcho"></b>.<br/>Abra seu e-mail e toque no link para entrar no painel. Pode deixar esta aba aberta — o painel abre sozinho depois que você clicar no link.</p>
         <button class="linkbtn" id="btnBack">‹ Usar outro e-mail</button>
       </div>
     </div>
@@ -247,24 +245,17 @@ $("btnSendCode").onclick=async()=>{
   const email=$("email").value.trim();
   if(!email||!email.includes("@")){ toast("Digite um e-mail válido"); return; }
   const b=$("btnSendCode"); b.disabled=true; b.textContent="Enviando…";
-  const { error }=await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
-  b.disabled=false; b.textContent="Receber código";
-  if(error){ toast("Erro ao enviar código"); return; }
+  try{ await sb.auth.signOut(); }catch(e){}
+  const redirect=location.origin+location.pathname;
+  const { error }=await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true, emailRedirectTo:redirect } });
+  b.disabled=false; b.textContent="Receber link de acesso";
+  if(error){ toast("Erro ao enviar e-mail"); return; }
   loginEmail=email; $("emailEcho").textContent=email;
-  $("stepEmail").classList.add("hidden"); $("stepCode").classList.remove("hidden"); $("code").focus();
-  toast("📧 Código enviado!");
+  $("stepEmail").classList.add("hidden"); $("stepLink").classList.remove("hidden");
+  toast("📧 Link enviado! Verifique seu e-mail.");
 };
-$("btnVerify").onclick=async()=>{
-  const token=$("code").value.trim();
-  if(token.length<6){ toast("Digite os 6 dígitos"); return; }
-  const b=$("btnVerify"); b.disabled=true; b.textContent="Entrando…";
-  const { error }=await sb.auth.verifyOtp({ email:loginEmail, token, type:"email" });
-  b.disabled=false; b.textContent="Entrar";
-  if(error){ toast("Código inválido ou expirado"); }
-};
-$("btnBack").onclick=()=>{ $("stepCode").classList.add("hidden"); $("stepEmail").classList.remove("hidden"); };
+$("btnBack").onclick=()=>{ $("stepLink").classList.add("hidden"); $("stepEmail").classList.remove("hidden"); };
 $("email").addEventListener("keydown",e=>{ if(e.key==="Enter")$("btnSendCode").click(); });
-$("code").addEventListener("keydown",e=>{ if(e.key==="Enter")$("btnVerify").click(); });
 
 /* ===== Sessão / permissão ===== */
 function show(el){ ["authScreen","deniedScreen","dash"].forEach(id=>$(id).classList.add("hidden")); $(el).classList.remove("hidden"); }
@@ -272,7 +263,7 @@ sb.auth.onAuthStateChange((_e,session)=>{ route(session); });
 (async()=>{ const { data }=await sb.auth.getSession(); route(data.session); })();
 
 async function route(session){
-  if(!session||!session.user){ show("authScreen"); return; }
+  if(!session||!session.user||session.user.is_anonymous){ show("authScreen"); return; }
   const { data, error }=await sb.rpc("is_admin");
   if(error){ toast("Falha ao verificar permissão"); show("authScreen"); return; }
   if(data===true){ $("whoEmail").textContent=session.user.email; show("dash"); loadDash(); }
