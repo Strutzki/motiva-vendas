@@ -154,8 +154,7 @@
     <div class="datlabel" id="dateLabel"></div>
 
     <div class="actions">
-      <button class="act primary" id="btnDaily">📅 Mensagem do dia</button>
-      <button class="act primary" id="btnRandom" style="background:linear-gradient(120deg,var(--accent),var(--c1));">🎲 Aleatória</button>
+      <button class="act primary" id="btnRandom">🎲 Nova mensagem</button>
     </div>
     <div class="actions">
       <button class="act wpp" id="btnWhats">
@@ -178,7 +177,7 @@
   <button id="installBtn" class="installbtn">📲 Instalar app no celular</button>
 
   <div class="foot">
-    <b id="footBrand">Motiva Vendas</b> · mensagem nova todo dia 💪<br/>
+    <b id="footBrand">Motiva Vendas</b> · sua motivação para vender mais 💪<br/>
     <span style="opacity:.8">Toque em ⚙️ para inserir a licença da empresa</span>
   </div>
 </div>
@@ -272,7 +271,7 @@ async function enterApp(){
   appReady = true;
   loadingScreen.classList.add("hidden"); appEl.classList.remove("hidden");
   fillSegments(); updateStreak();
-  await loadBranding(); showDaily();
+  await loadBranding(); showRandom();
 }
 
 /* ===== Segmentos ===== */
@@ -310,7 +309,7 @@ function render(text, isDaily){
   setTimeout(()=>{
     currentText=text; el.textContent=text; el.classList.toggle("small",text.length>140); el.style.opacity=1;
     $("segTag").textContent=segLabel(currentSeg);
-    $("dateLabel").textContent=isDaily?("— "+capitalize(fmtDate())):"— mensagem aleatória";
+    $("dateLabel").textContent=isDaily?("— "+capitalize(fmtDate())):"";
   },160);
 }
 
@@ -330,6 +329,7 @@ async function showRandom(){
   while(recent.includes(text) && tries<6){ const r=await sb.rpc("get_random_message",{p_segment:currentSeg}); if(r.error)break; text=r.data[0].message; tries++; }
   recent.push(text); if(recent.length>20) recent.shift();
   render(text, false);
+  store.set("mv_cache_"+currentSeg, JSON.stringify({d:new Date().toDateString(), t:text}));
 }
 async function handleRpcError(error, isDaily){
   const msg=(error.message||"")+(error.details||"");
@@ -345,9 +345,8 @@ async function handleRpcError(error, isDaily){
 }
 
 /* ===== Ações ===== */
-$("btnDaily").onclick=showDaily;
 $("btnRandom").onclick=showRandom;
-$("segSelect").onchange=e=>{ currentSeg=e.target.value; store.set("mv_seg",currentSeg); showDaily(); };
+$("segSelect").onchange=e=>{ currentSeg=e.target.value; store.set("mv_seg",currentSeg); showRandom(); };
 
 async function copyMsg(){
   const txt=currentText+"\n\n— "+$("brandName").textContent;
