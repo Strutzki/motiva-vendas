@@ -65,6 +65,7 @@
   .tagchip{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--c1) 12%,#fff);
         color:var(--c1);font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;margin-bottom:16px;}
   .quotemark{font-size:52px;line-height:0;color:color-mix(in srgb,var(--c1) 35%,#fff);font-family:Georgia,serif;height:24px;display:block;}
+  .quotemark.close{text-align:right;height:38px;margin-top:6px;}
   .msg{font-size:24px;line-height:1.44;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:6px 0 4px;transition:opacity .2s;}
   .msg.small{font-size:21px;}
   .msgwrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:130px;}
@@ -159,6 +160,7 @@
     <div class="msgwrap">
       <span class="quotemark">“</span>
       <div class="msg" id="message">Carregando…</div>
+      <span class="quotemark close">”</span>
       <div class="datlabel" id="dateLabel"></div>
     </div>
 
