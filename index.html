@@ -58,14 +58,16 @@
   .streak{display:flex;align-items:center;gap:6px;color:#fff;font-size:13px;opacity:.92;padding:2px 4px 8px;font-weight:500;}
 
   .card{background:var(--card);border-radius:var(--radius);padding:30px 26px 26px;
-        box-shadow:0 24px 60px rgba(0,0,0,.22);position:relative;overflow:hidden;}
+        box-shadow:0 24px 60px rgba(0,0,0,.22);position:relative;overflow:hidden;
+        flex:1;display:flex;flex-direction:column;}
   .card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;
         background:linear-gradient(90deg,var(--c1),var(--accent),var(--c2));}
   .tagchip{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--c1) 12%,#fff);
         color:var(--c1);font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;margin-bottom:16px;}
   .quotemark{font-size:52px;line-height:0;color:color-mix(in srgb,var(--c1) 35%,#fff);font-family:Georgia,serif;height:24px;display:block;}
-  .msg{font-size:23px;line-height:1.42;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:6px 0 4px;min-height:120px;transition:opacity .2s;}
-  .msg.small{font-size:20px;}
+  .msg{font-size:24px;line-height:1.44;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:6px 0 4px;transition:opacity .2s;}
+  .msg.small{font-size:21px;}
+  .msgwrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:130px;}
   .datlabel{color:var(--muted);font-size:13px;margin-top:16px;}
   .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
   .actions.duo{flex-wrap:nowrap;}
@@ -121,7 +123,7 @@
   .btn.fill:hover{filter:brightness(1.08);}
   .btn.line{background:#fff;border:1.5px solid #e5e7eb;color:var(--ink);margin-top:24px;}
   .btn.line:hover{background:#f9fafb;}
-  @media (max-width:420px){ .msg{font-size:21px;} .card{padding:26px 20px 22px;} }
+  @media (max-width:420px){ .msg{font-size:22px;} .card{padding:26px 20px 22px;} }
 </style>
 </head>
 <body>
@@ -154,9 +156,11 @@
   <div class="streak" id="streak"></div>
 
   <main class="card">
-    <span class="quotemark">“</span>
-    <div class="msg" id="message">Carregando…</div>
-    <div class="datlabel" id="dateLabel"></div>
+    <div class="msgwrap">
+      <span class="quotemark">“</span>
+      <div class="msg" id="message">Carregando…</div>
+      <div class="datlabel" id="dateLabel"></div>
+    </div>
 
     <div class="actions duo">
       <button class="act primary" id="btnRandom">🎲 Nova mensagem</button>
