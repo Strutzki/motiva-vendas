@@ -69,8 +69,6 @@
   .card{background:var(--card);border-radius:var(--radius);padding:34px 28px 24px;
         box-shadow:0 30px 60px -28px rgba(23,10,60,.55), 0 12px 26px -18px rgba(0,0,0,.24);
         position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;}
-  .quotemark{font-size:56px;line-height:0;color:color-mix(in srgb,var(--c1) 20%,#fff);font-family:Georgia,serif;height:26px;display:block;}
-  .quotemark.close{text-align:right;height:40px;margin-top:4px;}
   .msg{font-family:var(--brandfont);font-size:25px;line-height:1.4;font-weight:600;letter-spacing:-.015em;color:var(--ink);margin:8px 0 4px;transition:opacity .25s;}
   .msg.small{font-size:21px;}
   .msgwrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:130px;}
@@ -167,9 +165,7 @@
 
   <main class="card">
     <div class="msgwrap">
-      <span class="quotemark">“</span>
       <div class="msg" id="message">Carregando…</div>
-      <span class="quotemark close">”</span>
       <div class="datlabel" id="dateLabel"></div>
     </div>
 
