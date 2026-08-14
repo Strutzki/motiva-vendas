@@ -1,5 +1,5 @@
-/* Motiva Vendas — Service Worker (offline) */
-const CACHE = "motiva-vendas-v2";
+/* Motiva Vendas — Service Worker (offline + push) */
+const CACHE = "motiva-vendas-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -48,4 +48,34 @@ self.addEventListener("fetch", (e) => {
       }).catch(() => cached))
     );
   }
+});
+
+/* ===== Push: mostra a notificação ===== */
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = {}; }
+  const title = d.title || "Motiva Vendas 💪";
+  const opts = {
+    body: d.body || "Sua dose diária de motivação chegou!",
+    icon: "./icon-192.png",
+    badge: "./favicon-32.png",
+    tag: "motiva-daily",
+    renotify: true,
+    data: { url: d.url || "https://motivavendas.com.br" }
+  };
+  e.waitUntil(self.registration.showNotification(title, opts));
+});
+
+/* ===== Clique: abre/foca o app ===== */
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || "https://motivavendas.com.br";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ("focus" in c) { try { c.navigate(url); } catch (_) {} return c.focus(); }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
 });
