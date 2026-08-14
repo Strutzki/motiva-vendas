@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://kikfdoifausfladcjcec.supabase.co wss://kikfdoifausfladcjcec.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#6d28d9" />
 <title>Motiva Vendas — Painel de administração</title>
@@ -319,19 +320,21 @@ async function loadCompanies(){
     const isPub=c.license_key==="PUBLICO";
     const row=document.createElement("div"); row.className="company";
     const last = c.last_open ? new Date(c.last_open).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"}) : "—";
+    const lg=safeLogo(c.logo_url);
+    const logoHtml = lg ? `<img src="${escapeHtml(lg)}" alt=""/>` : escapeHtml(initialsColor(c.name));
     row.innerHTML=`
-      <div class="clogo" style="background:linear-gradient(120deg,${c.c1},${c.c2})">${c.logo_url?`<img src="${c.logo_url}"/>`:initialsColor(c.name)}</div>
+      <div class="clogo" style="background:linear-gradient(120deg,${safeHex(c.c1)},${safeHex(c.c2)})">${logoHtml}</div>
       <div class="cinfo">
         <div class="cname">${escapeHtml(c.name)}
           ${isPub?'<span class="badge pub">Pública</span>':(c.active?'<span class="badge on">Ativa</span>':'<span class="badge off">Inativa</span>')}
         </div>
         <div class="cmeta">
-          <span class="key" title="Copiar chave" data-key="${c.license_key}">${c.license_key}</span>
-          &nbsp;·&nbsp; ${c.opens} aberturas · ${c.users} usuários · último: ${last}
+          <span class="key" title="Copiar chave" data-key="${escapeHtml(c.license_key)}">${escapeHtml(c.license_key)}</span>
+          &nbsp;·&nbsp; ${Number(c.opens)||0} aberturas · ${Number(c.users)||0} usuários · último: ${escapeHtml(last)}
         </div>
       </div>
       <div class="cact">
-        <button class="iconbtn" data-edit="${c.id}">✏️ Editar</button>
+        <button class="iconbtn" data-edit="${escapeHtml(c.id)}">✏️ Editar</button>
       </div>`;
     box.appendChild(row);
   });
@@ -339,6 +342,8 @@ async function loadCompanies(){
   box.querySelectorAll("[data-edit]").forEach(el=>el.onclick=()=>openEditor(data.find(x=>x.id===el.dataset.edit)));
 }
 function escapeHtml(s){ return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function safeHex(v){ return /^#[0-9A-Fa-f]{6}$/.test(v||"")?v:"#6d28d9"; }
+function safeLogo(u){ return (u && /^(data:image\/|https:\/\/)/i.test(u))?u:""; }
 
 /* ===== Editor ===== */
 const overlay=$("overlay"), drawer=$("drawer");
@@ -353,7 +358,7 @@ function openEditor(company){
   $("fc1").value=company?company.c1:"#6d28d9";
   $("fc2").value=company?company.c2:"#2563eb";
   $("fc3").value=company?company.c3:"#f59e0b";
-  $("logoPrev").innerHTML=company&&company.logo_url?`<img src="${company.logo_url}"/>`:"💬";
+  { const _lg=safeLogo(company&&company.logo_url); $("logoPrev").innerHTML=_lg?`<img src="${escapeHtml(_lg)}" alt=""/>`:"💬"; }
   const isPub=company&&company.license_key==="PUBLICO";
   $("fActive").checked=company?company.active:true;
   $("activeField").style.display=isPub?"none":"block"; // pública sempre ativa
@@ -365,7 +370,10 @@ $("closeEditor").onclick=closeEditor; overlay.onclick=closeEditor;
 $("btnGenKey").onclick=()=>{
   const base=($("fName").value||"empresa").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
   const year=new Date().getFullYear();
-  $("fKey").value=(base||"EMPRESA")+"-"+year;
+  const alphabet="ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // sem 0/O/1/I/L ambíguos
+  const a=new Uint32Array(6); (window.crypto||window.msCrypto).getRandomValues(a);
+  let rnd=""; for(let i=0;i<6;i++) rnd+=alphabet[a[i]%alphabet.length];
+  $("fKey").value=((base||"EMPRESA").slice(0,24))+"-"+year+"-"+rnd;
 };
 $("btnUpload").onclick=()=>$("fileLogo").click();
 $("fileLogo").onchange=e=>{

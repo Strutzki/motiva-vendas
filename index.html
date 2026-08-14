@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://kikfdoifausfladcjcec.supabase.co wss://kikfdoifausfladcjcec.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#6d28d9" />
 <title>Motiva Vendas — Mensagem do dia</title>
@@ -315,17 +316,20 @@ async function loadBranding(){
   if(error || !data || !data.length){ return; }
   const b=data[0];
   const r=document.documentElement.style;
-  if(b.c1) r.setProperty("--c1",b.c1);
-  if(b.c2) r.setProperty("--c2",b.c2);
-  if(b.c3) r.setProperty("--accent",b.c3);
-  document.querySelector('meta[name=theme-color]').setAttribute("content", b.c1||"#6d28d9");
+  const isHex=v=>/^#[0-9A-Fa-f]{6}$/.test(v||"");
+  if(isHex(b.c1)) r.setProperty("--c1",b.c1);
+  if(isHex(b.c2)) r.setProperty("--c2",b.c2);
+  if(isHex(b.c3)) r.setProperty("--accent",b.c3);
+  document.querySelector('meta[name=theme-color]').setAttribute("content", isHex(b.c1)?b.c1:"#6d28d9");
   $("brandName").textContent=b.company_name||"Motiva Vendas";
   $("footBrand").textContent=b.company_name||"Motiva Vendas";
   $("brandTag").textContent=b.tagline||"Sua dose diária de motivação";
   $("accCompany").textContent=(b.company_name||"Motiva Vendas") + (b.is_public?" (livre)":"");
   const lb=$("logoBox");
-  if(b.logo_url){ lb.innerHTML='<img src="'+b.logo_url+'" style="width:100%;height:100%;object-fit:cover"/>'; }
-  else { lb.innerHTML='<svg viewBox="0 0 240 240" width="30" height="30"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>'; }
+  const svgLogo='<svg viewBox="0 0 240 240" width="30" height="30"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>';
+  if(b.logo_url && /^(data:image\/|https:\/\/)/i.test(b.logo_url)){
+    lb.innerHTML=""; const img=document.createElement("img"); img.src=b.logo_url; img.alt=""; img.style.cssText="width:100%;height:100%;object-fit:cover"; lb.appendChild(img);
+  } else { lb.innerHTML=svgLogo; }
 }
 
 /* ===== Render ===== */
