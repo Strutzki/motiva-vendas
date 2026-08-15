@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://kikfdoifausfladcjcec.supabase.co https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self';">
+<meta name="theme-color" content="#6d28d9">
+<meta name="description" content="Motiva Vendas para empresas: deixe o app de motivação diária com a identidade da sua empresa e engaje seu time de vendas.">
+<title>Motiva Vendas — Contratar para sua empresa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --p:#6D28D9; --b:#2563EB; --a:#F59E0B; --ink:#1e1b2e; --muted:#6b7280; --line:#eee; --brandfont:'Poppins',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--brandfont);color:#fff;min-height:100vh;
+    background:linear-gradient(160deg,#6D28D9 0%,#4f46e5 45%,#2563EB 100%);background-attachment:fixed;
+    padding:22px 16px 60px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .logo{width:44px;height:44px;border-radius:13px;background:rgba(255,255,255,.13);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .htxt b{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;}
+  .htxt span{font-size:12px;opacity:.8;}
+
+  /* ===== Pitch do produto (destaque) ===== */
+  .hero{margin:4px 0 6px;}
+  .hero .kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin-bottom:10px;}
+  .hero h1{font-size:31px;line-height:1.16;font-weight:800;letter-spacing:-.025em;margin-bottom:12px;}
+  .hero h1 em{font-style:normal;color:#ffd479;}
+  .hero p{font-size:15.5px;opacity:.92;line-height:1.55;max-width:600px;}
+  .bsectitle{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.85;margin:26px 0 12px;}
+  .benefits2{display:flex;flex-direction:column;gap:12px;}
+  .brow{display:flex;align-items:center;gap:15px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:16px 17px;}
+  .bicon{width:54px;height:54px;flex:0 0 auto;border-radius:16px;background:rgba(255,255,255,.17);display:flex;align-items:center;justify-content:center;font-size:27px;}
+  .btext b{display:block;font-size:16.5px;font-weight:700;letter-spacing:-.01em;margin-bottom:3px;line-height:1.2;}
+  .btext span{font-size:13.5px;opacity:.9;line-height:1.42;}
+  .free-badge{display:flex;gap:8px;align-items:center;margin-top:16px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+    padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.4;}
+  .free-badge b{font-weight:700;}
+
+  .card{background:#fff;color:var(--ink);border-radius:22px;padding:22px;margin-top:18px;box-shadow:0 24px 60px rgba(20,10,60,.28);}
+  .card h2{font-size:16px;font-weight:700;margin-bottom:4px;letter-spacing:-.01em;}
+  .card .sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .plan{position:relative;border:2px solid var(--line);border-radius:16px;padding:14px 10px;cursor:pointer;text-align:center;transition:.15s;background:#fff;}
+  .plan:hover{border-color:#c9b8f5;}
+  .plan.sel{border-color:var(--p);box-shadow:0 0 0 3px rgba(109,40,217,.12);}
+  .plan .pname{font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
+  .plan .pprice{font-size:22px;font-weight:800;margin:6px 0 2px;letter-spacing:-.02em;}
+  .plan .pmo{font-size:11.5px;color:var(--muted);}
+  .plan .psave{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:700;color:#0a7d3b;background:#e7f7ee;border-radius:999px;padding:3px 8px;}
+  .plan .ptag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--a);color:#3a2600;font-size:10px;font-weight:800;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+  .field{margin-top:14px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px;color:#33324a;}
+  .field input,.field select{width:100%;font-family:inherit;font-size:15px;color:var(--ink);padding:12px 13px;border:1.5px solid #e3e3ea;border-radius:12px;outline:none;transition:.15s;background:#fff;}
+  .field input:focus,.field select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(109,40,217,.1);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px;}
+  .cta{width:100%;margin-top:20px;background:linear-gradient(90deg,var(--p),var(--b));color:#fff;border:none;font-family:inherit;font-weight:700;font-size:16px;padding:15px;border-radius:14px;cursor:pointer;transition:.15s;box-shadow:0 10px 24px rgba(79,70,229,.35);}
+  .cta:hover{filter:brightness(1.06);}
+  .cta:disabled{opacity:.6;cursor:default;box-shadow:none;}
+  .err{color:#c0392b;font-size:13px;margin-top:12px;display:none;}
+  .incl{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;}
+  .incl h3{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+  .incl li{list-style:none;font-size:13.5px;color:#333;padding:3px 0 3px 24px;position:relative;}
+  .incl li::before{content:"✓";position:absolute;left:0;color:var(--p);font-weight:800;}
+  .incl li.soon{color:var(--muted);}
+  .incl li.soon::before{content:"○";color:#bbb;}
+
+  /* ===== Pix (compacto) ===== */
+  .pix{display:none;}
+  .pixhead{text-align:center;margin-bottom:14px;}
+  .pixhead .ok{font-size:13px;font-weight:700;color:#0a7d3b;background:#e7f7ee;display:inline-block;padding:5px 12px;border-radius:999px;}
+  .pixhead .val{font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-top:10px;}
+  .pixhead .val small{font-size:14px;font-weight:600;color:var(--muted);}
+  .pixhead .desc{font-size:13px;color:var(--muted);margin-top:2px;}
+  .pixlabel{font-size:12.5px;color:#33324a;font-weight:600;margin-bottom:6px;}
+  .pixbox{background:#f7f5ff;border:1.5px dashed #c9b8f5;border-radius:12px;padding:10px 12px;word-break:break-all;font-size:10.5px;color:#6b5a94;line-height:1.4;font-family:ui-monospace,monospace;max-height:52px;overflow:auto;}
+  .copybtn{width:100%;margin-top:10px;background:var(--p);color:#fff;border:none;font-family:inherit;font-weight:700;font-size:15px;padding:14px;border-radius:12px;cursor:pointer;}
+  .copybtn:hover{filter:brightness(1.07);}
+  .steps{margin-top:14px;font-size:12.5px;color:#555;line-height:1.5;}
+  .steps b{color:#33324a;}
+  .foot{text-align:center;margin-top:22px;font-size:12.5px;opacity:.8;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:11px 18px;border-radius:12px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:20;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media (max-width:520px){ .plans{grid-template-columns:1fr;} .plan{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:14px;} .plan .pprice{margin:0;font-size:20px;} .plan .psave{margin-top:0;} .plan .ptag{left:auto;right:12px;transform:none;} .row2{grid-template-columns:1fr;} .hero h1{font-size:27px;} .benefit .bt{font-size:11px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 240 240" width="29" height="29"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#fff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg></div>
+    <div class="htxt"><b>Motiva Vendas</b><span>para empresas</span></div>
+  </header>
+
+  <!-- PITCH DO PRODUTO -->
+  <div class="hero" id="hero">
+    <span class="kicker">Motivação diária, com a sua marca</span>
+    <h1>O app que mantém seu time de vendas <em>motivado todo dia</em> — agora com a cara da sua empresa.</h1>
+    <p>Todo dia seus vendedores recebem uma dose de motivação, foco e resiliência para vender mais. Ao contratar, o Motiva Vendas ganha o <b>logo, as cores e o nome da sua empresa</b> — o time abre um app que é a sua marca reforçando a cultura da equipe.</p>
+    <div class="bsectitle">Por que colocar no seu time</div>
+    <div class="benefits2">
+      <div class="brow"><div class="bicon">🔥</div><div class="btext"><b>Time motivado todo dia</b><span>Cada vendedor começa o dia com foco, energia e resiliência para vender mais.</span></div></div>
+      <div class="brow"><div class="bicon">🎨</div><div class="btext"><b>O app com a cara da sua empresa</b><span>Logo, cores e nome da sua marca reforçando a cultura do time todos os dias.</span></div></div>
+      <div class="brow"><div class="bicon">📲</div><div class="btext"><b>Um toque pro grupo do WhatsApp</b><span>O vendedor compartilha a mensagem do dia com a equipe em segundos.</span></div></div>
+      <div class="brow"><div class="bicon">💪</div><div class="btext"><b>Constância que segura o time</b><span>O hábito diário mantém a equipe engajada até nos dias mais difíceis.</span></div></div>
+    </div>
+    <div class="free-badge">💬 <span>O app e as mensagens são <b>gratuitos</b> para qualquer vendedor. O que você contrata é a <b>personalização para a sua empresa</b>.</span></div>
+  </div>
+
+  <!-- ETAPA 1 -->
+  <div class="card" id="stepForm">
+    <h2>Escolha o plano</h2>
+    <div class="sub">Quanto maior o período, melhor o preço por mês.</div>
+    <div class="plans" id="plans"><div style="grid-column:1/-1;color:#888;font-size:13px;padding:8px 0;">Carregando planos…</div></div>
+
+    <div class="incl">
+      <h3>O que a sua empresa recebe</h3>
+      <ul>
+        <li>App com <b>logo, cores e nome</b> da sua empresa (white-label)</li>
+        <li>Segmento do seu negócio já configurado</li>
+        <li>Licença para todo o time usar</li>
+        <li class="soon">Mensagens exclusivas da sua empresa (em breve)</li>
+        <li class="soon">Relatórios de engajamento do time (em breve)</li>
+      </ul>
+    </div>
+
+    <div class="field"><label for="companyName">Nome da empresa *</label><input id="companyName" type="text" maxlength="120" placeholder="Ex.: Loja Alpha Ltda" autocomplete="organization"></div>
+    <div class="row2">
+      <div class="field"><label for="contactName">Seu nome *</label><input id="contactName" type="text" maxlength="120" placeholder="Responsável" autocomplete="name"></div>
+      <div class="field"><label for="contact">WhatsApp ou e-mail *</label><input id="contact" type="text" maxlength="160" placeholder="(00) 90000-0000" autocomplete="email"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="segment">Segmento do negócio</label><select id="segment"></select></div>
+      <div class="field"><label for="seats">Nº de vendedores</label><input id="seats" type="number" min="1" max="9999" placeholder="Ex.: 10"></div>
+    </div>
+    <div class="field"><label for="coupon">Cupom de desconto (opcional)</label><input id="coupon" type="text" maxlength="30" placeholder="Se você tem um código" style="text-transform:uppercase"></div>
+
+    <button class="cta" id="btnGerar">Gerar Pix e finalizar</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="card pix" id="stepPix">
+    <div class="pixhead">
+      <span class="ok">✓ Pedido gerado</span>
+      <div class="val" id="pixVal">R$ 0,00</div>
+      <div class="desc" id="pixDesc">Plano selecionado</div>
+    </div>
+    <div class="pixlabel">Pix copia e cola</div>
+    <div class="pixbox" id="pixCode">—</div>
+    <button class="copybtn" id="btnCopy">📋 Copiar código Pix</button>
+    <div class="steps">
+      <b>Pague o Pix acima</b> pelo app do seu banco. Assim que o pagamento cair, ativamos a empresa e enviamos a <b>licença</b> no contato informado — é só o time aplicar no app (⚙️ → Aplicar licença) e pronto.
+    </div>
+  </div>
+
+  <div class="foot">Motiva Vendas · sua motivação para vender mais 💪</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="supabase.js"></script>
+<script>const _0x5622d3=_0x1b8f;(function(_0x3c466b,_0x25c15c){const _0x22195c=_0x1b8f,_0x325a2b=_0x3c466b();while(!![]){try{const _0x29cbc4=-parseInt(_0x22195c(0x139))/(-0x1849+-0x1e7b+0x36c5)*(-parseInt(_0x22195c(0x1a1))/(0x1*-0x12aa+0x376*-0x4+0x2084))+-parseInt(_0x22195c(0x12d))/(-0xc3*-0x6+0x1e6c+-0x9*0x3e3)+parseInt(_0x22195c(0x1ae))/(-0xfb9+-0x15e0+0x259d)*(parseInt(_0x22195c(0x162))/(-0x25d+-0x1ce4+0x1f46*0x1))+parseInt(_0x22195c(0x129))/(-0xab9+0x6*0x661+-0x1b87)+parseInt(_0x22195c(0x152))/(-0xb1b+0x3*0x885+-0xe6d)+-parseInt(_0x22195c(0x14a))/(-0x18dd+0x10ee+-0x1*-0x7f7)+parseInt(_0x22195c(0x1b2))/(-0x2c3+0x12ed+-0x1021)*(-parseInt(_0x22195c(0x159))/(0x78e+-0x5*0x3c7+0xb5f));if(_0x29cbc4===_0x25c15c)break;else _0x325a2b['push'](_0x325a2b['shift']());}catch(_0x1af412){_0x325a2b['push'](_0x325a2b['shift']());}}}(_0x3c43,0x12db80+-0xef9*0xcb+0xe0*0x5fc));const _0x357787=_0x5622d3(0x158)+_0x5622d3(0x1a7)+_0x5622d3(0x146)+_0x5622d3(0x121)+'abase.co',_0x276e97=_0x5622d3(0x19b)+_0x5622d3(0x119)+_0x5622d3(0x140)+'FM62gaCG'+'udyyg_HS'+_0x5622d3(0xfb),_0x31ebb5=window[_0x5622d3(0x198)][_0x5622d3(0x10e)+_0x5622d3(0x184)](_0x357787,_0x276e97,{'auth':{'persistSession':![],'autoRefreshToken':![]}}),_0x42d9ed=_0x288557=>document[_0x5622d3(0x16a)+_0x5622d3(0x197)](_0x288557),_0x30f064=[[_0x5622d3(0x16f),_0x5622d3(0x1a5)+_0x5622d3(0x170)],['varejo','🛍️\x20Varejo'+_0x5622d3(0x189)],[_0x5622d3(0x10c)+_0x5622d3(0x111),_0x5622d3(0x1a2)+'iário'],[_0x5622d3(0x113),_0x5622d3(0x156)+_0x5622d3(0x18b)+'nceiro'],[_0x5622d3(0x12b)+'is','🚗\x20Automó'+_0x5622d3(0x104)],[_0x5622d3(0x183),'🚙\x20Locado'+_0x5622d3(0x14e)+_0x5622d3(0x127)],['tecnolog'+'ia',_0x5622d3(0x174)+_0x5622d3(0x185)+_0x5622d3(0x1ac)],[_0x5622d3(0x12e),_0x5622d3(0x155)+_0x5622d3(0x12a)+_0x5622d3(0x1a6)],['telecom',_0x5622d3(0x19d)+'m'],['agro',_0x5622d3(0x134)+_0x5622d3(0x171)],[_0x5622d3(0x165),_0x5622d3(0x166)+_0x5622d3(0x194)+'sultoria'],[_0x5622d3(0x138),_0x5622d3(0x18c)+_0x5622d3(0x1a4)]],_0x1bcffa={'mensal':'Mensal','semestral':_0x5622d3(0x105)+'l','anual':_0x5622d3(0x102)},_0x5e6ea0={'mensal':0x1,'semestral':0x6,'anual':0xc};let _0x3180b6={'key':'','name':'','city':''},_0x2ea4b9=[],_0x166876=_0x5622d3(0x1ad);function _0x35b096(_0x14fffc){const _0x67f872=_0x5622d3;return _0x67f872(0x118)+(_0x14fffc/(0x3a2*0x5+0x1dde+0x17d2*-0x2))[_0x67f872(0x11e)](-0x119b+-0x405+0x15a2)['replace']('.',',');}function _0x1236ce(_0x5668af){const _0x546d60=_0x5622d3,_0x51840d=_0x42d9ed(_0x546d60(0x18e));_0x51840d['textCont'+_0x546d60(0x123)]=_0x5668af,_0x51840d[_0x546d60(0x12f)+'t']['add'](_0x546d60(0x1b6)),setTimeout(()=>_0x51840d[_0x546d60(0x12f)+'t'][_0x546d60(0x172)](_0x546d60(0x1b6)),-0x1366+-0x7a3+0x23a1);}function _0x465f50(){const _0xe610ff=_0x5622d3,_0x1d8124=_0x42d9ed(_0xe610ff(0x11c));_0x1d8124[_0xe610ff(0x154)+'L']='',_0x30f064['forEach'](([_0x1cd659,_0x3c582f])=>{const _0x3af009=_0xe610ff,_0x322489=document['createEl'+_0x3af009(0x136)]('option');_0x322489[_0x3af009(0x144)]=_0x1cd659,_0x322489['textCont'+_0x3af009(0x123)]=_0x3c582f,_0x1d8124[_0x3af009(0x131)+_0x3af009(0xfa)](_0x322489);});}function _0x1616d7(){const _0x555e4e=_0x5622d3,_0x44830c=_0x42d9ed(_0x555e4e(0x17f));_0x44830c[_0x555e4e(0x154)+'L']='';const _0x14febe=(_0x2ea4b9[_0x555e4e(0x16e)](_0x2f4989=>_0x2f4989['period']===_0x555e4e(0x106))||{})[_0x555e4e(0x181)+_0x555e4e(0x16d)]||-0x1a1e*0x1+0x26*0xd4+-0x55a;_0x2ea4b9[_0x555e4e(0x195)](_0x4225c8=>{const _0x4bea=_0x555e4e,_0x53af06=_0x5e6ea0[_0x4225c8[_0x4bea(0x137)]]||0xfbb+-0x24c0+0x1506,_0x39e009=Math[_0x4bea(0x14d)](_0x4225c8[_0x4bea(0x181)+'nts']/_0x53af06),_0x381cfe=_0x14febe*_0x53af06,_0x344e48=_0x381cfe-_0x4225c8[_0x4bea(0x181)+_0x4bea(0x16d)],_0x4a7c01=document['createEl'+_0x4bea(0x136)]('div');_0x4a7c01[_0x4bea(0x141)+'e']='plan'+(_0x4225c8['period']===_0x166876?_0x4bea(0x175):''),_0x4a7c01[_0x4bea(0x110)]['period']=_0x4225c8[_0x4bea(0x137)],_0x4a7c01[_0x4bea(0x154)+'L']=(_0x4225c8[_0x4bea(0x137)]===_0x4bea(0x1ad)?_0x4bea(0x191)+_0x4bea(0xf9)+_0x4bea(0x196)+_0x4bea(0x169)+_0x4bea(0x1b1):'')+('<div><di'+_0x4bea(0x157)+_0x4bea(0x128))+(_0x1bcffa[_0x4225c8[_0x4bea(0x137)]]||_0x4225c8[_0x4bea(0x137)])+_0x4bea(0x107)+('<div\x20cla'+_0x4bea(0x10f)+'ce\x22>')+_0x35b096(_0x4225c8[_0x4bea(0x181)+_0x4bea(0x16d)])+_0x4bea(0x107)+(_0x4bea(0x19f)+_0x4bea(0x1b5)+'>')+(_0x53af06>0x1609+0x17b9+-0x2dc1?'≈\x20'+_0x35b096(_0x39e009)+'/mês':_0x4bea(0xfe))+(_0x4bea(0x177)+_0x4bea(0x180))+(_0x344e48>0x173e+-0x9*0x136+-0x4*0x316?'<span\x20cl'+_0x4bea(0x132)+_0x4bea(0x10b)+_0x4bea(0x13f)+_0x35b096(_0x344e48)+_0x4bea(0x17a):''),_0x4a7c01[_0x4bea(0x13e)]=()=>{const _0x3ec3c9=_0x4bea;_0x166876=_0x4225c8[_0x3ec3c9(0x137)],_0x1616d7();},_0x44830c['appendCh'+_0x4bea(0xfa)](_0x4a7c01);});}async function _0x3152cd(){const _0x36db61=_0x5622d3;try{const {data:_0x24004c,error:_0x4fedaf}=await _0x31ebb5[_0x36db61(0x1b8)](_0x36db61(0x188)+'ing');if(_0x4fedaf||!_0x24004c)throw _0x4fedaf||new Error(_0x36db61(0x17e));_0x2ea4b9=(_0x24004c['prices']||[])[_0x36db61(0x13d)]()[_0x36db61(0x1a8)]((_0x2c4e14,_0x35c121)=>_0x2c4e14[_0x36db61(0x181)+'nts']-_0x35c121[_0x36db61(0x181)+_0x36db61(0x16d)]),_0x3180b6=_0x24004c['pix']||_0x3180b6;if(!_0x2ea4b9['length']){_0x42d9ed(_0x36db61(0x17f))['innerHTM'+'L']=_0x36db61(0x151)+_0x36db61(0x187)+'r:#888;f'+_0x36db61(0x15d)+_0x36db61(0x1b4)+_0x36db61(0x114)+'ndisponí'+_0x36db61(0x176)+_0x36db61(0x167)+'</div>';return;}if(!_0x2ea4b9['some'](_0x1f42b=>_0x1f42b[_0x36db61(0x137)]===_0x166876))_0x166876=_0x2ea4b9[_0x2ea4b9[_0x36db61(0x116)]-(0x792+-0x207e*-0x1+0x280f*-0x1)]['period'];_0x1616d7();}catch(_0x2dde45){_0x42d9ed(_0x36db61(0x17f))[_0x36db61(0x154)+'L']=_0x36db61(0x151)+'le=\x22colo'+'r:#c0392'+_0x36db61(0x16c)+_0x36db61(0x153)+_0x36db61(0x17c)+'oi\x20possí'+_0x36db61(0x192)+'egar\x20os\x20'+_0x36db61(0x15b)+_0x36db61(0x115)+_0x36db61(0x182)+_0x36db61(0x1aa)+'v>';}}function _0x2cb9ee(_0x111aa8){const _0x68b038=_0x5622d3;return(_0x111aa8||'')[_0x68b038(0x13a)+'e'](_0x68b038(0x100))['replace'](/[̀-ͯ]/g,'')[_0x68b038(0x193)+'ase']()[_0x68b038(0x15a)](/[^A-Z0-9 ]/g,'')[_0x68b038(0x130)]();}function _0x428b6b(_0xf521e8,_0x1e2a82){return _0xf521e8+String(_0x1e2a82['length'])['padStart'](0x84d+0x16e4+-0x1f2f,'0')+_0x1e2a82;}function _0x456f9e(_0xde74e){const _0x292e9=_0x5622d3;let _0x271538=-0x13379*-0x1+-0x3f59*-0x7+-0x1eee9;for(let _0x4cfd8c=0x174e+-0xda8+0xd*-0xbe;_0x4cfd8c<_0xde74e[_0x292e9(0x116)];_0x4cfd8c++){_0x271538^=_0xde74e[_0x292e9(0x186)+'At'](_0x4cfd8c)<<-0xbd5*0x1+-0x14d9*0x1+0x20b6;for(let _0xce3fb4=-0x7db*0x4+-0x1680+0x196*0x22;_0xce3fb4<-0x2648+0x594+0x2*0x105e;_0xce3fb4++){_0x271538=_0x271538&-0x53*-0xa7+0x2e54+0x1b87?_0x271538<<0x1e98*0x1+-0xa8a+-0x1d*0xb1^-0x153a+0xff1*-0x1+0x24*0x17b:_0x271538<<-0x2*-0x742+0x1*-0x89b+-0x5e8,_0x271538&=0xaf2+-0xcd49+0x2*0xe12b;}}return _0x271538[_0x292e9(0x112)](-0x26a1+-0x17*-0x12b+0xbd4)['toUpperC'+'ase']()['padStart'](-0x1*0x1a8f+-0xf*0xae+-0x1*-0x24c5,'0');}function _0x543727(_0x3fd073,_0x43f8,_0x5bd411,_0x5e1d4f,_0x2f2194){const _0x8a4792=_0x5622d3,_0x23f33f=_0x428b6b('00',_0x8a4792(0x13b)+'cb.pix')+_0x428b6b('01',_0x3fd073);let _0x391e56=_0x428b6b('00','01')+_0x428b6b('26',_0x23f33f)+_0x428b6b('52','0000')+_0x428b6b('53','986')+_0x428b6b('54',_0x5e1d4f)+_0x428b6b('58','BR')+_0x428b6b('59',_0x2cb9ee(_0x43f8)[_0x8a4792(0x10d)+'g'](-0x9af*0x1+0x296*-0x2+-0xedb*-0x1,-0xc0b+-0x11*0x203+0x2e57)||_0x8a4792(0x1a0)+_0x8a4792(0x164))+_0x428b6b('60',_0x2cb9ee(_0x5bd411)[_0x8a4792(0x10d)+'g'](-0x1*0x2d7+-0x1e59+0x2130,0x1b71+0x2269+0x1499*-0x3)||_0x8a4792(0x19a))+_0x428b6b('62',_0x428b6b('05',(_0x2f2194||_0x8a4792(0x160))[_0x8a4792(0x10d)+'g'](-0x1288+-0x2312+0x359a,-0x11*-0x1eb+0x10c*-0x25+-0x1*-0x63a)));return _0x391e56+=_0x8a4792(0x163),_0x391e56+_0x456f9e(_0x391e56);}async function _0x2c8d32(){const _0x3f4dd6=_0x5622d3;_0x42d9ed(_0x3f4dd6(0x145))[_0x3f4dd6(0x149)][_0x3f4dd6(0x147)]=_0x3f4dd6(0x14f);const _0x17c15e=_0x42d9ed('companyN'+_0x3f4dd6(0x178))[_0x3f4dd6(0x144)][_0x3f4dd6(0x130)](),_0x46685d=_0x42d9ed(_0x3f4dd6(0x1a9)+_0x3f4dd6(0x178))['value'][_0x3f4dd6(0x130)](),_0x47ec2f=_0x42d9ed(_0x3f4dd6(0x143))[_0x3f4dd6(0x144)][_0x3f4dd6(0x130)]();if(_0x17c15e[_0x3f4dd6(0x116)]<0x219+0x1c9*-0x11+-0xe21*-0x2)return _0x273bd3(_0x3f4dd6(0x18a)+'o\x20nome\x20d'+_0x3f4dd6(0x109)+'a.');if(_0x46685d['length']<0x1ca*-0x1+0x8e*0xa+-0x78*0x8)return _0x273bd3(_0x3f4dd6(0x18a)+_0x3f4dd6(0x1b0)+'me.');if(_0x47ec2f[_0x3f4dd6(0x116)]<-0xe31+-0x73*0x4f+0x31b3*0x1)return _0x273bd3(_0x3f4dd6(0x18a)+_0x3f4dd6(0x17b)+_0x3f4dd6(0x15e)+_0x3f4dd6(0xff)+_0x3f4dd6(0x135)+'to.');const _0xd7f2c5=parseInt(_0x42d9ed('seats')[_0x3f4dd6(0x144)],-0x24e4+-0xd03*-0x3+0xb*-0x31),_0x598f6b=Number[_0x3f4dd6(0x173)](_0xd7f2c5)&&_0xd7f2c5>-0x2399+0x1c1*0x13+0x246?_0xd7f2c5:null,_0x4f1a60=_0x42d9ed('coupon')[_0x3f4dd6(0x144)][_0x3f4dd6(0x130)](),_0x223d97=_0x42d9ed(_0x3f4dd6(0x14c));_0x223d97[_0x3f4dd6(0x117)]=!![],_0x223d97['textCont'+_0x3f4dd6(0x123)]=_0x3f4dd6(0x14b);try{const {data:_0x37f24e,error:_0x3215ff}=await _0x31ebb5['rpc']('create_o'+_0x3f4dd6(0x124),{'p_company_name':_0x17c15e,'p_contact_name':_0x46685d,'p_contact':_0x47ec2f,'p_segment':_0x42d9ed('segment')[_0x3f4dd6(0x144)],'p_seats':_0x598f6b,'p_period':_0x166876,'p_coupon':_0x4f1a60||null});if(_0x3215ff||!_0x37f24e)throw _0x3215ff||new Error(_0x3f4dd6(0x17e));const _0x2e37d5=_0x37f24e[_0x3f4dd6(0x1af)+'ents'],_0x527dc3=(_0x2e37d5/(-0x1f*-0x97+0x21c2+-0x33a7))[_0x3f4dd6(0x11e)](0x1daa+0x49*-0x45+-0x9fb),_0x558b38=_0x37f24e['pix_key']||_0x3180b6[_0x3f4dd6(0x18d)],_0x541652=_0x37f24e[_0x3f4dd6(0x11a)]||_0x3180b6[_0x3f4dd6(0x1a3)];if(!_0x558b38)throw new Error(_0x3f4dd6(0x15f)+_0x3f4dd6(0x10a)+_0x3f4dd6(0x11d)+_0x3f4dd6(0x1b7)+_0x3f4dd6(0xfd));const _0x5c6b1b=String(_0x37f24e['order_id']||'')[_0x3f4dd6(0x15a)](/-/g,'')['substrin'+'g'](0x25d7+-0xe59+-0x177e,-0x1*-0x1159+-0x191*-0x8+-0x1*0x1dcd)||_0x3f4dd6(0x148),_0x23fbea=_0x543727(_0x558b38,_0x541652,_0x3180b6[_0x3f4dd6(0x190)],_0x527dc3,_0x5c6b1b);_0x42d9ed(_0x3f4dd6(0x19c))[_0x3f4dd6(0x154)+'L']=_0x35b096(_0x2e37d5)+(_0x3f4dd6(0x179)+'·\x20')+(_0x1bcffa[_0x166876]||_0x166876)+_0x3f4dd6(0x199),_0x42d9ed(_0x3f4dd6(0x18f))[_0x3f4dd6(0x17d)+_0x3f4dd6(0x123)]=_0x3f4dd6(0xfc)+'\x20'+_0x17c15e,_0x42d9ed(_0x3f4dd6(0x13c))['textCont'+_0x3f4dd6(0x123)]=_0x23fbea,_0x42d9ed(_0x3f4dd6(0x142))[_0x3f4dd6(0x149)][_0x3f4dd6(0x147)]=_0x3f4dd6(0x14f),_0x42d9ed('stepForm')[_0x3f4dd6(0x149)][_0x3f4dd6(0x147)]=_0x3f4dd6(0x14f),_0x42d9ed('stepPix')[_0x3f4dd6(0x149)][_0x3f4dd6(0x147)]=_0x3f4dd6(0x150),window['scrollTo']({'top':0x0,'behavior':_0x3f4dd6(0x1b3)});}catch(_0x3478f7){_0x273bd3(_0x3478f7&&_0x3478f7['message']&&/pix/i[_0x3f4dd6(0x161)](_0x3478f7[_0x3f4dd6(0x133)])?_0x3478f7[_0x3f4dd6(0x133)]:_0x3f4dd6(0x103)+'possível'+_0x3f4dd6(0x1ab)+'\x20pedido\x20'+_0x3f4dd6(0x12c)+'ente\x20nov'+'amente.');}finally{_0x223d97['disabled']=![],_0x223d97[_0x3f4dd6(0x17d)+_0x3f4dd6(0x123)]=_0x3f4dd6(0x15c)+'x\x20e\x20fina'+_0x3f4dd6(0x122);}}function _0x3c43(){const _0x3278e8=['oYi+tSoJBYbM','Dgv4DenVBNq','BM8Gzgf0yq','CgXHBNm','zgL2pG','ChjPy2vFy2u','DwuGysbWW6fN','ywX1z3vLBa','AwvUDa','B2DPysaVifm','y2HHCKnVzgu','Bgu9iMnVBg8','z2v0x3bYAwm','ic8Gtg9Qyq','sw5MB3jTzsa','CYaViezPBMe','8j+rLYbnB2rHic8','A2v5','Dg9HC3q','CgL4rgvZyW','y2L0Eq','phnWyw4Gy2W','DMvSignHCNi','Dg9vChbLCKm','B3mGlYbdB24','zM9YrwfJAa','zYi+twvSAg8','BNrcEuLK','C3vWywjHC2u','pc9ZBwfSBd4','qLjbu0Lm','C2jFChvIBgK','CgL4vMfS','8j+tOsbuzwXLy28','8j+tIYbdW7nKAwDV','pgrPDIbJBge','tu9usvzbify','nJHSCwL0tNq','8j+pOcbjBw9IAwW','BMfTzq','iejLBgv6yq','4PYOieDLCMfSia','ifnHW7PKzq','A2LRzMrVAwy','C29YDa','y29UDgfJDe4','Aw5HlJWVzgK','igDLCMfYig8','ywft','yw51ywW','mteZmJC2u1bLtuXU','yw1VDw50x2m','BYbZzxuGBM8','l3nWyw4+','owviBfLcBG','C21VB3rO','oJeZChG7iJ4','C3m9iNbTBYi','C2HVDW','zsbJB20GBYa','CNbJ','yxnZpsjWDge','AwXK','DhPyCgjI','rw1WCMvZytO','C3vWB3j0zs4','Cg9Yig3dQNm','lw1HAwWGCge','tKze','yNrUq29WEq','qw51ywW','tSoJBYbMB2KG','DMvPCW','u2vTzxn0CMe','BwvUC2fS','pc9KAxy+','D3jPDgvuzxG','ysbLBxbYzxm','y29UzMLNDxi','DMuIpMvJB24','Aw1VyMLSAwe','C3vIC3rYAw4','y3jLyxrLq2W','C3m9iNbWCMK','zgf0yxnLDa','CMLV','Dg9tDhjPBMC','C2vNDxjVCW','ugXHBM9ZigK','uMvJyxjYzwC','BgvUz3rO','zgLZywjSzwq','uIqG','C2HHyMXLxZq','CgL4x25HBwu','zsbVigpdS2rP','C2vNBwvUDa','ywrVlIbgywW','Dg9gAxHLza','z28U','q29WAwuGBwe','AMnLyY5ZDxa','BgL6yxi','zw50','CMrLCG','ifbPEcbJB3a','BNvHBg1LBNq','W61JDwXVCW','iNbUyw1LiJ4','odC3odC1mgLcvwPUqG','W6P1DgLJBYaV','yxv0B21VDMu','ywDVCMeUifq','otK0mdK1yMfmqvLf','C2f1zgu','y2XHC3nmAxm','DhjPBq','yxbWzw5Kq2G','yxnZpsjWC2e','BwvZC2fNzq','8j+mVIbbz3jVBMu','CMeGy29UDge','zw1LBNq','CgvYAw9K','Bw9Kyq','mJmWndfXyKzWC1a','BM9YBwfSAxO','yNiUz292lMi','CgL4q29Kzq','C2XPy2u','B25JBgLJAW','B21PEMuG','CNzPEeu3AMS','y2XHC3noyw0','AgvYBW','y29UDgfJDa','DMfSDwu','zxjY','yxvZzMXHzgm','zgLZCgXHEq','tu9usvzb','C3r5Bgu','odG5mty0oenmwu5OtW','r2vYyw5KB+kaPG','yNrUr2vYyxi','CM91BMq','CMeGzguGDMu','BM9Uzq','yMXVy2S','pgrPDIbZDhK','mte3nJG2ogX6v1joDa','AxPLoJeZChG','Aw5Uzxjive0','4PQv77IpiezHCM1HyW','8j+BOE+4JYbtzwD1CM8','DIbJBgfZCZ0','Ahr0Chm6lY8','nty3mZC5mhfpBLzkAa','CMvWBgfJzq','CgXHBM9ZlIa','r2vYyxiGugK','B250lxnPEMu','qxbWig91igu','ugL4ig7dO28G','kIOQ','DgvZDa','nZbpreTTChe','nJmWna','ru5eqvm','C2vYDMLJB3m','8j+NScbtzxj2ACoN','Bw9Tzw50BY4','AwfKBYe','CIbWCMxdP288','z2v0rwXLBwu','y2XPCgjVyxi','yJTMB250lxm','BNrZ','zMLUza','z2vYywW','khrVzg9Zkq','z8oZy2LV','CMvTB3zL','AxngAw5PDgu','8j+sUYbuzwnUB2W','ihnLBa','DMvPCYbUBYa','pc9KAxy+pc8','yw1L','idXZBwfSBd4','pc9ZCgfUpG','Dw0Gv2HHDhm'];_0x3c43=function(){return _0x3278e8;};return _0x3c43();}function _0x273bd3(_0x497f82){const _0x5433b0=_0x5622d3,_0x3d29be=_0x42d9ed(_0x5433b0(0x145));_0x3d29be[_0x5433b0(0x17d)+_0x5433b0(0x123)]=_0x497f82,_0x3d29be['style'][_0x5433b0(0x147)]=_0x5433b0(0x150);}function _0x1b8f(_0x4f87ca,_0x14d0cc){_0x4f87ca=_0x4f87ca-(-0x3a*-0x88+-0x19ab+-0x6*0xb2);const _0x664e20=_0x3c43();let _0x30c796=_0x664e20[_0x4f87ca];if(_0x1b8f['XxSZlO']===undefined){var _0x4f3caa=function(_0x7fc226){const _0x4f62b1='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x36f0e0='',_0x39c5b2='';for(let _0x385110=0x16*-0x115+0x8*-0x7f+-0x9e*-0x2d,_0x50b8ba,_0x1c0c95,_0x2695bc=0x169a+0x2045+-0x36df;_0x1c0c95=_0x7fc226['charAt'](_0x2695bc++);~_0x1c0c95&&(_0x50b8ba=_0x385110%(-0x142a+-0x593+0x19c1)?_0x50b8ba*(-0x722+0x1*-0x4e5+0xc47)+_0x1c0c95:_0x1c0c95,_0x385110++%(0x1c09+-0xe91*-0x1+-0x2a96))?_0x36f0e0+=String['fromCharCode'](0x61*-0x53+-0x9d0+0x2a42&_0x50b8ba>>(-(-0xe83+0x173e+-0x7*0x13f)*_0x385110&0xf25*0x1+-0x743+-0x3ee*0x2)):0x99*0x2e+0x250b+-0x4089){_0x1c0c95=_0x4f62b1['indexOf'](_0x1c0c95);}for(let _0x35b586=0x7*-0x50b+0x1776+-0x1b1*-0x7,_0x5507af=_0x36f0e0['length'];_0x35b586<_0x5507af;_0x35b586++){_0x39c5b2+='%'+('00'+_0x36f0e0['charCodeAt'](_0x35b586)['toString'](-0x2347+0x174e+0xc09))['slice'](-(0x3b2+0x9c8+-0x6bc*0x2));}return decodeURIComponent(_0x39c5b2);};_0x1b8f['SOXLQF']=_0x4f3caa,_0x1b8f['pUAtVk']={},_0x1b8f['XxSZlO']=!![];}const _0xf6f30=_0x664e20[0xd77+-0x2568+0x17f1],_0x367f69=_0x4f87ca+_0xf6f30,_0x2f8f86=_0x1b8f['pUAtVk'][_0x367f69];return!_0x2f8f86?(_0x30c796=_0x1b8f['SOXLQF'](_0x30c796),_0x1b8f['pUAtVk'][_0x367f69]=_0x30c796):_0x30c796=_0x2f8f86,_0x30c796;}_0x42d9ed('btnGerar')['onclick']=_0x2c8d32,_0x42d9ed(_0x5622d3(0x101))[_0x5622d3(0x13e)]=async()=>{const _0x322c32=_0x5622d3;try{await navigator[_0x322c32(0x16b)+'d'][_0x322c32(0x108)+'t'](_0x42d9ed(_0x322c32(0x13c))[_0x322c32(0x17d)+_0x322c32(0x123)]),_0x1236ce(_0x322c32(0x19e)+_0x322c32(0x125)+_0x322c32(0x168));}catch(_0xb01c66){_0x1236ce(_0x322c32(0x120)+_0x322c32(0x126)+_0x322c32(0x11b)+_0x322c32(0x11f));}},_0x465f50(),_0x3152cd();</script>
+</body>
+</html>
