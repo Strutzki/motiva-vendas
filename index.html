@@ -1093,5 +1093,190 @@ if (_0x34a005 && !_0x405c11) {
   paint();
 })();
 </script>
+<script>
+/* ==========================================================================
+   Motiva Vendas — patch aditivo (não altera o app ofuscado)
+   Corrige: (2) imagem de compartilhar usa o LOGO da empresa + slogan condicional
+            (3) esconde o slogan padrão "Sua dose diária de motivação" p/ empresas contratadas
+   Anexado antes de </body>. Depende só de elementos existentes (#logoBox,#brandName,
+   #brandTag,#message,#toast,#btnShareImg) e das vars CSS --c1/--c2.
+   ========================================================================== */
+(function () {
+  var DEFAULT_SLOGAN = "Sua dose diária de motivação";
+  var DEFAULT_NAME = "Motiva Vendas";
+  var DEFAULT_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function isBranded() {
+    var bn = $("brandName");
+    var n = bn ? (bn.textContent || "").trim() : "";
+    return !!n && n !== DEFAULT_NAME;
+  }
+
+  /* ---------- FIX #3: slogan ---------- */
+  function applySlogan() {
+    var tag = $("brandTag");
+    if (!tag) return;
+    var cur = (tag.textContent || "").trim();
+    if (isBranded() && cur === DEFAULT_SLOGAN) {
+      tag.textContent = "";
+      tag.style.display = "none";
+    } else if (cur) {
+      tag.style.display = "";
+    }
+  }
+
+  /* ---------- FIX #2: imagem de compartilhar ---------- */
+  function toast(m) {
+    var t = $("toast"); if (!t) return;
+    t.textContent = m; t.classList.add("show");
+    clearTimeout(window.__mvToastT);
+    window.__mvToastT = setTimeout(function () { t.classList.remove("show"); }, 2600);
+  }
+  function wrapLines(ctx, text, maxW) {
+    var words = String(text).split(/\s+/), lines = [], cur = "";
+    for (var i = 0; i < words.length; i++) {
+      var t = cur ? cur + " " + words[i] : words[i];
+      if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = words[i]; }
+      else cur = t;
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+  function loadImage(src) {
+    return new Promise(function (res, rej) {
+      var im = new Image();
+      if (!/^data:/i.test(src)) im.crossOrigin = "anonymous";
+      im.onload = function () { res(im); };
+      im.onerror = function () { rej(); };
+      im.src = src;
+    });
+  }
+  function drawSvg(ctx, svg, x, y, w, h) {
+    return new Promise(function (res) {
+      var im = new Image();
+      im.onload = function () { try { ctx.drawImage(im, x, y, w, h); } catch (e) {} res(); };
+      im.onerror = function () { res(); };
+      im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    });
+  }
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  async function buildShareCanvas() {
+    var msgEl = $("message");
+    var text = msgEl ? (msgEl.textContent || "").trim() : "";
+    if (!text) return null;
+    var cs = getComputedStyle(document.documentElement);
+    var c1 = (cs.getPropertyValue("--c1") || "#6d28d9").trim();
+    var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
+    var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
+    var slogan = (($("brandTag") && $("brandTag").textContent) || "").trim(); // já vem vazio p/ empresas contratadas
+    var W = 1080, H = 1350;
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+    var g = ctx.createLinearGradient(0, 0, W * 0.45, H);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var rg = ctx.createRadialGradient(W * 0.5, -140, 60, W * 0.5, -140, W);
+    rg.addColorStop(0, "rgba(255,255,255,0.16)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    try { await document.fonts.ready; } catch (e) {}
+
+    // logo: da empresa (se houver <img> no header), senão o padrão
+    var headerImg = document.querySelector("#logoBox img");
+    var drew = false;
+    if (headerImg && headerImg.getAttribute("src")) {
+      try {
+        var im = await loadImage(headerImg.src);
+        ctx.save(); roundRectPath(ctx, 84, 92, 96, 96, 20); ctx.clip();
+        var ar = im.width / im.height, tr = 1, sw, sh, sx, sy;
+        if (ar > tr) { sh = im.height; sw = sh * tr; sx = (im.width - sw) / 2; sy = 0; }
+        else { sw = im.width; sh = sw / tr; sx = 0; sy = (im.height - sh) / 2; }
+        ctx.drawImage(im, sx, sy, sw, sh, 84, 92, 96, 96);
+        ctx.restore(); drew = true;
+      } catch (e) { drew = false; }
+    }
+    if (!drew) { await drawSvg(ctx, DEFAULT_LOGO_SVG, 84, 92, 96, 96); }
+
+    // nome + slogan (condicional)
+    ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.fillStyle = "#fff";
+    ctx.font = "700 46px Poppins, sans-serif";
+    ctx.fillText(name, 196, slogan ? 128 : 140);
+    if (slogan) {
+      ctx.font = "500 26px Poppins, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      ctx.fillText(slogan, 196, 168);
+    }
+
+    // mensagem
+    var fs = text.length > 200 ? 50 : text.length > 140 ? 58 : text.length > 80 ? 68 : 82;
+    ctx.fillStyle = "#fff"; ctx.font = "700 " + fs + "px Poppins, sans-serif";
+    var maxW = W - 176;
+    var lines = wrapLines(ctx, text, maxW);
+    while (lines.length * fs * 1.3 > 720 && fs > 34) {
+      fs -= 4; ctx.font = "700 " + fs + "px Poppins, sans-serif"; lines = wrapLines(ctx, text, maxW);
+    }
+    var lh = fs * 1.3, block = lines.length * lh, cy = H * 0.47, y = cy - block / 2 + lh / 2;
+    ctx.textAlign = "center";
+    for (var i = 0; i < lines.length; i++) { ctx.fillText(lines[i], W / 2, y); y += lh; }
+    ctx.fillStyle = "#f59e0b";
+    var bw = 96, by = cy + block / 2 + 52;
+    ctx.fillRect(W / 2 - bw / 2, by, bw, 6);
+    ctx.font = "600 30px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.9)"; ctx.textAlign = "center";
+    ctx.fillText("motivavendas.com.br", W / 2, H - 96);
+    return cv;
+  }
+
+  async function shareImage() {
+    var msgEl = $("message");
+    if (!msgEl || !(msgEl.textContent || "").trim()) return;
+    toast("🖼️ Gerando imagem…");
+    try {
+      var cv = await buildShareCanvas();
+      if (!cv) { toast("Não foi possível gerar a imagem"); return; }
+      var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
+      var blob = await new Promise(function (r) { cv.toBlob(r, "image/png", 0.95); });
+      if (!blob) { toast("Não foi possível gerar a imagem"); return; }
+      var fname = (name.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-+|-+$/g, "") || "motiva") + ".png";
+      var file = new File([blob], fname, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: name }); } catch (e) {}
+      } else {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a"); a.href = url; a.download = fname;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+        toast("🖼️ Imagem salva!");
+      }
+    } catch (e) { toast("Não foi possível gerar a imagem"); }
+  }
+
+  function bindShare() { var b = $("btnShareImg"); if (b) b.onclick = shareImage; }
+
+  /* ---------- ativação + observadores ---------- */
+  function boot() { applySlogan(); bindShare(); }
+  var brandBox = document.querySelector(".brand");
+  if (brandBox && window.MutationObserver) {
+    new MutationObserver(function () { applySlogan(); })
+      .observe(brandBox, { childList: true, characterData: true, subtree: true });
+  }
+  boot();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  [400, 900, 1800, 3200].forEach(function (ms) { setTimeout(boot, ms); });
+
+  // exposto p/ teste automatizado
+  window.__mvBuildShareCanvas = buildShareCanvas;
+  window.__mvApplySlogan = applySlogan;
+})();
+
+</script>
 </body>
 </html>
