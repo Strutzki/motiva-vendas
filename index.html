@@ -1277,6 +1277,51 @@ if (_0x34a005 && !_0x405c11) {
   window.__mvApplySlogan = applySlogan;
 })();
 
+/* ==========================================================================
+   FIX #4 — na 1ª vez, usar o SEGMENTO da empresa (default_segment) como padrão.
+   Respeita a escolha do usuário (se já existe mv_seg salvo, não mexe).
+   Busca o default_segment via get_branding (cliente próprio, mesma sessão anônima),
+   e ajusta o #segSelect disparando "change" (o app recarrega a mensagem do dia).
+   ========================================================================== */
+(function () {
+  try {
+    var already = null;
+    try { already = localStorage.getItem("mv_seg"); } catch (e) { already = null; }
+    if (already) return; // usuário já tem um segmento escolhido/definido
+    if (!window.supabase || !window.supabase.createClient) return;
+
+    var SB_URL = "https://kikfdoifausfladcjcec.supabase.co";
+    var SB_KEY = "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+    var sb2 = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+
+    function applySeg(seg) {
+      var sel = document.getElementById("segSelect");
+      if (!sel || !sel.options || !sel.options.length) return false;
+      var ok = false;
+      for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === seg) { ok = true; break; } }
+      if (!ok) return true; // segmento inexistente no app; nada a fazer
+      if (sel.value !== seg) {
+        sel.value = seg;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      window.__mvSegApplied = seg;
+      return true;
+    }
+
+    sb2.rpc("get_branding").then(function (r) {
+      var row = r && r.data && r.data[0];
+      var seg = row && row.default_segment;
+      if (!seg || seg === "geral") return;
+      // tenta aplicar quando o seletor já estiver montado (enterApp o preenche)
+      var tries = 0;
+      var iv = setInterval(function () {
+        tries++;
+        if (applySeg(seg) || tries > 50) clearInterval(iv);
+      }, 200);
+    }).catch(function () {});
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
