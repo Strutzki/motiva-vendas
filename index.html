@@ -1107,24 +1107,9 @@ if (_0x34a005 && !_0x405c11) {
   var DEFAULT_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>';
   var $ = function (id) { return document.getElementById(id); };
 
-  function isBranded() {
-    var bn = $("brandName");
-    var n = bn ? (bn.textContent || "").trim() : "";
-    return !!n && n !== DEFAULT_NAME;
-  }
-
-  /* ---------- FIX #3: slogan ---------- */
-  function applySlogan() {
-    var tag = $("brandTag");
-    if (!tag) return;
-    var cur = (tag.textContent || "").trim();
-    if (isBranded() && cur === DEFAULT_SLOGAN) {
-      tag.textContent = "";
-      tag.style.display = "none";
-    } else if (cur) {
-      tag.style.display = "";
-    }
-  }
+  /* Slogan: o próprio app já mostra a frase da empresa, ou o padrão
+     "Sua dose diária de motivação" quando não há frase própria.
+     (Decisão 2026: sempre usar o slogan padrão quando não houver frase própria.) */
 
   /* ---------- FIX #2: imagem de compartilhar ---------- */
   function toast(m) {
@@ -1261,20 +1246,14 @@ if (_0x34a005 && !_0x405c11) {
 
   function bindShare() { var b = $("btnShareImg"); if (b) b.onclick = shareImage; }
 
-  /* ---------- ativação + observadores ---------- */
-  function boot() { applySlogan(); bindShare(); }
-  var brandBox = document.querySelector(".brand");
-  if (brandBox && window.MutationObserver) {
-    new MutationObserver(function () { applySlogan(); })
-      .observe(brandBox, { childList: true, characterData: true, subtree: true });
-  }
+  /* ---------- ativação ---------- */
+  function boot() { bindShare(); }
   boot();
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   [400, 900, 1800, 3200].forEach(function (ms) { setTimeout(boot, ms); });
 
   // exposto p/ teste automatizado
   window.__mvBuildShareCanvas = buildShareCanvas;
-  window.__mvApplySlogan = applySlogan;
 })();
 
 /* ==========================================================================
