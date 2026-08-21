@@ -1093,6 +1093,7 @@ if (_0x34a005 && !_0x405c11) {
   paint();
 })();
 </script>
+
 <script>
 /* ==========================================================================
    Motiva Vendas — patch aditivo (não altera o app ofuscado)
@@ -1298,6 +1299,147 @@ if (_0x34a005 && !_0x405c11) {
         if (applySeg(seg) || tries > 50) clearInterval(iv);
       }, 200);
     }).catch(function () {});
+  } catch (e) {}
+})();
+
+/* ==========================================================================
+   FIX #5 — Captura de contato (lead) com recompensa: mensagem elaborada.
+   Só na versão livre (is_public). Pede WhatsApp (+ nome, empresa, consentimento),
+   salva via save_lead e entrega na hora uma versão mais elaborada da mensagem.
+   ========================================================================== */
+(function () {
+  try {
+    var done = false, hide = false;
+    try { done = !!localStorage.getItem("mv_lead_done"); hide = !!localStorage.getItem("mv_lead_hide"); } catch (e) {}
+    if (done || hide) return;
+    if (!window.supabase || !window.supabase.createClient) return;
+
+    var SB_URL = "https://kikfdoifausfladcjcec.supabase.co";
+    var SB_KEY = "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+    var sbL = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+    var $ = function (id) { return document.getElementById(id); };
+    function toast(m){ var t=$("toast"); if(!t) return; t.textContent=m; t.classList.add("show"); clearTimeout(window.__mvT2); window.__mvT2=setTimeout(function(){t.classList.remove("show");},2800); }
+    function digits(v){ return (v||"").replace(/\D/g,""); }
+
+    function injectStyle(){
+      if($("mvLeadStyle")) return;
+      var s=document.createElement("style"); s.id="mvLeadStyle";
+      s.textContent = `
+        .mvcta{position:relative;margin:16px 0 6px;padding:15px 16px;border-radius:16px;background:#fff;border:1px solid rgba(0,0,0,.09);box-shadow:0 6px 18px rgba(20,10,50,.06);}
+        .mvcta-x{position:absolute;top:7px;right:11px;background:none;border:none;font-size:20px;line-height:1;color:var(--muted,#6f6b7e);cursor:pointer;}
+        .mvcta-t{font-family:var(--brandfont,inherit);font-weight:700;font-size:15.5px;color:var(--ink,#1b1630);margin-bottom:5px;padding-right:18px;}
+        .mvcta-s{font-size:12.5px;line-height:1.5;color:var(--muted,#6f6b7e);margin-bottom:12px;}
+        .mvcta-b{display:block;width:100%;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:14px;color:#fff;background:linear-gradient(120deg,var(--c1,#6d28d9),var(--c2,#2563eb));cursor:pointer;font-family:inherit;}
+        .mvmodal-ov{position:fixed;inset:0;background:rgba(15,10,40,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px;}
+        .mvmodal-ov.show{display:flex;}
+        .mvmodal{position:relative;background:#fff;border-radius:20px;max-width:380px;width:100%;padding:24px 20px 20px;box-shadow:0 24px 60px rgba(0,0,0,.3);max-height:92vh;overflow:auto;}
+        .mvmodal-x{position:absolute;top:11px;right:14px;background:none;border:none;font-size:22px;color:var(--muted,#6f6b7e);cursor:pointer;line-height:1;}
+        .mvmodal-t{font-family:var(--brandfont,inherit);font-weight:700;font-size:19px;color:var(--ink,#1b1630);margin-bottom:6px;padding-right:20px;}
+        .mvmodal-s{font-size:13px;line-height:1.5;color:var(--muted,#6f6b7e);margin-bottom:16px;}
+        .mvlbl{display:block;font-size:12.5px;font-weight:600;color:var(--ink,#1b1630);margin:0 0 5px;}
+        .mvlbl span{color:var(--muted,#6f6b7e);font-weight:400;}
+        .mvinp{width:100%;box-sizing:border-box;padding:12px;border:1.5px solid rgba(0,0,0,.14);border-radius:11px;font-size:15px;font-family:inherit;margin-bottom:12px;color:var(--ink,#1b1630);}
+        .mvinp:focus{outline:none;border-color:var(--c1,#6d28d9);}
+        .mvchk{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink,#1b1630);line-height:1.4;margin:2px 0 16px;cursor:pointer;}
+        .mvchk input{margin-top:1px;width:18px;height:18px;flex:none;}
+        .mvchk a{color:var(--c1,#6d28d9);font-weight:600;text-decoration:underline;}
+        .mvsub{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(120deg,var(--c1,#6d28d9),var(--c2,#2563eb));cursor:pointer;font-family:inherit;}
+        .mvsub:disabled{opacity:.5;cursor:not-allowed;}
+        .mvpriv{font-size:11px;color:var(--muted,#6f6b7e);text-align:center;margin-top:12px;line-height:1.4;}
+      `;
+      document.head.appendChild(s);
+    }
+
+    function buildCta(){
+      if($("mvCta")) return;
+      var card=document.createElement("div");
+      card.className="mvcta"; card.id="mvCta";
+      card.innerHTML='<button class="mvcta-x" id="mvCtaX" aria-label="Fechar">×</button>'
+        +'<div class="mvcta-t">✨ Quer uma versão mais elaborada?</div>'
+        +'<div class="mvcta-s">Receba agora uma reflexão mais profunda da mensagem de hoje, direto no seu WhatsApp.</div>'
+        +'<button class="mvcta-b" id="mvCtaB">Quero receber</button>';
+      var foot=document.querySelector(".foot");
+      if(foot && foot.parentNode){ foot.parentNode.insertBefore(card, foot); }
+      else { (document.getElementById("app")||document.body).appendChild(card); }
+      $("mvCtaX").onclick=function(){ try{localStorage.setItem("mv_lead_hide","1");}catch(e){} card.remove(); };
+      $("mvCtaB").onclick=openModal;
+    }
+
+    function buildModal(){
+      if($("mvModal")) return;
+      var m=document.createElement("div");
+      m.className="mvmodal-ov"; m.id="mvModal";
+      m.innerHTML='<div class="mvmodal">'
+        +'<button class="mvmodal-x" id="mvMX" aria-label="Fechar">×</button>'
+        +'<div class="mvmodal-t">Receba sua mensagem elaborada ✨</div>'
+        +'<div class="mvmodal-s">Deixe seu WhatsApp e a gente te manda uma versão mais profunda pra fechar o dia com força.</div>'
+        +'<label class="mvlbl">WhatsApp (com DDD)</label>'
+        +'<input class="mvinp" id="mvPhone" type="tel" inputmode="numeric" placeholder="(31) 99999-9999" autocomplete="tel">'
+        +'<label class="mvlbl">Seu nome <span>(opcional)</span></label>'
+        +'<input class="mvinp" id="mvName" type="text" placeholder="Como te chamam?" autocomplete="name">'
+        +'<label class="mvlbl">Onde você trabalha? <span>(opcional)</span></label>'
+        +'<input class="mvinp" id="mvWork" type="text" placeholder="Nome da empresa">'
+        +'<label class="mvchk"><input type="checkbox" id="mvConsent"> <span>Li e aceito a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.</span></label>'
+        +'<button class="mvsub" id="mvSub" disabled>Receber minha mensagem</button>'
+        +'<div class="mvpriv">🔒 Seus dados ficam seguros. Você pode parar de receber quando quiser.</div>'
+        +'</div>';
+      document.body.appendChild(m);
+      function refresh(){ $("mvSub").disabled = !(digits($("mvPhone").value).length>=10 && $("mvConsent").checked); }
+      $("mvPhone").addEventListener("input",refresh);
+      $("mvConsent").addEventListener("change",refresh);
+      $("mvMX").onclick=closeModal;
+      m.addEventListener("click",function(e){ if(e.target===m) closeModal(); });
+      $("mvSub").onclick=submit;
+    }
+
+    function openModal(){ buildModal(); $("mvModal").classList.add("show"); setTimeout(function(){ try{$("mvPhone").focus();}catch(e){} },60); }
+    function closeModal(){ var m=$("mvModal"); if(m) m.classList.remove("show"); }
+
+    async function showElaborated(){
+      try{
+        var seg="geral";
+        try{ seg=(document.getElementById("segSelect")||{}).value || localStorage.getItem("mv_seg") || "geral"; }catch(e){}
+        var r=await sbL.rpc("get_elaborated_message",{ p_segment: seg });
+        var msg=r && r.data && r.data[0] && r.data[0].message;
+        if(msg){
+          var el=$("message"); if(el){ el.classList.remove("small","tiny"); if(msg.length>250) el.classList.add("tiny"); else if(msg.length>140) el.classList.add("small"); el.textContent=msg; }
+          var b=$("campaignBadge"); if(b){ b.textContent="✨ Sua mensagem elaborada"; b.classList.remove("hidden"); }
+        }
+      }catch(e){}
+    }
+
+    async function submit(){
+      var btn=$("mvSub"); btn.disabled=true; btn.textContent="Enviando…";
+      try{
+        var CONSENT_TXT="Li e aceito a Política de Privacidade e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.";
+        var r=await sbL.rpc("save_lead",{ p_name:$("mvName").value, p_phone:$("mvPhone").value, p_workplace:$("mvWork").value, p_consent:true, p_consent_text:CONSENT_TXT, p_policy_version:"2026-08-21" });
+        if(r.error) throw r.error;
+        try{ localStorage.setItem("mv_lead_done","1"); }catch(e){}
+        closeModal();
+        var cta=$("mvCta"); if(cta) cta.remove();
+        toast("💜 Pronto! Aqui está sua mensagem elaborada.");
+        await showElaborated();
+      }catch(e){
+        btn.disabled=false; btn.textContent="Receber minha mensagem";
+        toast("Não consegui salvar agora. Tente de novo.");
+      }
+    }
+
+    sbL.rpc("get_branding").then(function(r){
+      var row=r && r.data && r.data[0];
+      if(row && row.is_public===false) return; // empresa contratada: não mostra o convite
+      injectStyle();
+      var tries=0;
+      var iv=setInterval(function(){
+        tries++;
+        var appEl=document.getElementById("app");
+        var ready=appEl && !appEl.classList.contains("hidden") && document.querySelector(".foot");
+        if(ready){ clearInterval(iv); buildCta(); }
+        else if(tries>60){ clearInterval(iv); }
+      },250);
+    }).catch(function(){});
+
+    window.__mvOpenLead = openModal;
   } catch (e) {}
 })();
 
