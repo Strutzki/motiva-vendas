@@ -1443,6 +1443,46 @@ if (_0x34a005 && !_0x405c11) {
   } catch (e) {}
 })();
 
+/* ==========================================================================
+   FIX #6 — Rodapé usa a frase PRÓPRIA da empresa (não o slogan do Motiva).
+   O app-base preenche só #footBrand (nome) e deixa um texto fixo do Motiva
+   ao lado. O topo (#brandTag) já recebe a frase da empresa via branding.
+   Aqui espelhamos #brandTag no rodapé — mas SÓ quando é frase própria
+   (diferente do padrão). Sem frase própria, mantém o texto original do rodapé.
+   ========================================================================== */
+(function () {
+  try {
+    var DEFAULT_TAG = "sua dose diária de motivação";
+    var origFooterText = null;
+    function sync() {
+      var bt = document.getElementById("brandTag");
+      var fb = document.getElementById("footBrand");
+      if (!bt || !fb) return;
+      var node = fb.nextSibling; // nó de texto "· sua motivação para vender mais 💪"
+      if (!node || node.nodeType !== 3) return;
+      if (origFooterText === null) origFooterText = node.textContent;
+      var tag = (bt.textContent || "").trim();
+      if (tag && tag.toLowerCase() !== DEFAULT_TAG) {
+        node.textContent = " · " + tag + " ";
+      } else {
+        node.textContent = origFooterText;
+      }
+    }
+    function start() {
+      var bt = document.getElementById("brandTag");
+      if (!bt) { setTimeout(start, 200); return; }
+      sync();
+      try {
+        var mo = new MutationObserver(sync);
+        mo.observe(bt, { childList: true, characterData: true, subtree: true });
+      } catch (e) {}
+      [400, 900, 1800, 3200].forEach(function (ms) { setTimeout(sync, ms); });
+    }
+    start();
+    window.__mvSyncFooterTag = sync;
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
