@@ -1258,6 +1258,59 @@ if (_0x34a005 && !_0x405c11) {
 })();
 
 /* ==========================================================================
+   AUTH HELPER — os blocos FIX #4/#5 usam um cliente Supabase próprio. As RPCs
+   get_branding / save_lead / get_elaborated_message exigem usuário autenticado.
+   Aqui reaproveitamos a sessão anônima que o app já criou (token no localStorage);
+   se ainda não estiver pronta, tentamos por alguns segundos e, em último caso,
+   fazemos um signInAnonymously no próprio cliente. Sem isso, as RPCs falham
+   com not_authenticated e nada é salvo.
+   ========================================================================== */
+(function () {
+  window.__mvAuthClient = function (client) {
+    return new Promise(function (resolve) {
+      var done = false, tries = 0;
+      function finish(ok) { if (!done) { done = true; resolve(ok); } }
+      function readSession() {
+        try {
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && /sb-.*-auth-token/.test(k)) {
+              var raw = localStorage.getItem(k);
+              if (raw) {
+                var s = JSON.parse(raw);
+                var sess = s.currentSession || s;
+                if (sess && sess.access_token && sess.refresh_token) return sess;
+              }
+            }
+          }
+        } catch (e) {}
+        return null;
+      }
+      function fallback() {
+        try {
+          client.auth.signInAnonymously()
+            .then(function () { finish(true); })
+            .catch(function () { finish(false); });
+        } catch (e) { finish(false); }
+      }
+      function attempt() {
+        var sess = readSession();
+        if (sess) {
+          client.auth.setSession({ access_token: sess.access_token, refresh_token: sess.refresh_token })
+            .then(function () { finish(true); })
+            .catch(fallback);
+          return;
+        }
+        tries++;
+        if (tries > 25) { fallback(); return; } // ~5s esperando a sessão do app
+        setTimeout(attempt, 200);
+      }
+      attempt();
+    });
+  };
+})();
+
+/* ==========================================================================
    FIX #4 — na 1ª vez, usar o SEGMENTO da empresa (default_segment) como padrão.
    Respeita a escolha do usuário (se já existe mv_seg salvo, não mexe).
    Busca o default_segment via get_branding (cliente próprio, mesma sessão anônima),
@@ -1288,7 +1341,7 @@ if (_0x34a005 && !_0x405c11) {
       return true;
     }
 
-    sb2.rpc("get_branding").then(function (r) {
+    window.__mvAuthClient(sb2).then(function () { return sb2.rpc("get_branding"); }).then(function (r) {
       var row = r && r.data && r.data[0];
       var seg = row && row.default_segment;
       if (!seg || seg === "geral") return;
@@ -1411,6 +1464,7 @@ if (_0x34a005 && !_0x405c11) {
     async function submit(){
       var btn=$("mvSub"); btn.disabled=true; btn.textContent="Enviando…";
       try{
+        try{ await window.__mvAuthClient(sbL); }catch(e){}
         var CONSENT_TXT="Li e aceito a Política de Privacidade e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.";
         var r=await sbL.rpc("save_lead",{ p_name:$("mvName").value, p_phone:$("mvPhone").value, p_workplace:$("mvWork").value, p_consent:true, p_consent_text:CONSENT_TXT, p_policy_version:"2026-08-21" });
         if(r.error) throw r.error;
@@ -1425,7 +1479,7 @@ if (_0x34a005 && !_0x405c11) {
       }
     }
 
-    sbL.rpc("get_branding").then(function(r){
+    window.__mvAuthClient(sbL).then(function(){ return sbL.rpc("get_branding"); }).then(function(r){
       var row=r && r.data && r.data[0];
       if(row && row.is_public===false) return; // empresa contratada: não mostra o convite
       injectStyle();
