@@ -163,6 +163,16 @@
   .btn.fill:hover{filter:brightness(1.08);}
   .btn.line{background:#fff;border:1.5px solid #e5e7eb;color:var(--ink);margin-top:24px;}
   .btn.line:hover{background:#f9fafb;}
+  /* Seletor de idioma (Configurações) */
+  .langseg{display:flex;gap:8px;}
+  .langopt{flex:1;border:1.5px solid #e5e7eb;background:#fff;border-radius:11px;padding:11px 8px;font-size:14px;font-weight:600;
+        font-family:var(--font);color:var(--ink);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .langopt:hover{background:#f9fafb;}
+  .langopt.on{border-color:var(--c1);background:color-mix(in srgb,var(--c1) 10%, #fff);color:var(--c1);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 30%, #fff);}
+  /* Botão rápido de idioma no cabeçalho */
+  .gear.langquick{font-family:var(--brandfont);font-weight:700;font-size:13px;letter-spacing:.02em;width:auto;min-width:42px;padding:0 12px;gap:5px;}
+  .gear.langquick::before{content:"🌐";font-size:14px;}
+  @media (max-width:400px){ .gear.langquick{min-width:38px;padding:0 9px;font-size:12px;} }
   @media (max-width:420px){ .msg{font-size:22px;} .msg.small{font-size:20px;} .msg.tiny{font-size:16.5px;} .card{padding:28px 22px 22px;} }
 </style>
 </head>
@@ -191,6 +201,7 @@
       <span id="brandTag">Sua dose diária de motivação</span>
     </div>
     <div class="hactions">
+      <button class="gear langquick" id="langQuick" title="Idioma / Idioma" aria-label="Trocar idioma"><span id="langQuickLabel">ES</span></button>
       <button class="gear" id="openFavs" title="Favoritos" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l2.95 5.98 6.6.96-4.77 4.65 1.13 6.57L12 17.7l-5.9 3.06 1.13-6.57L2.46 9.54l6.6-.96L12 2.6z"/></svg></button>
       <button class="gear" id="openSettings" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
@@ -239,13 +250,22 @@
   <div class="dbody">
     <div class="row"><span class="k">Empresa</span><span class="v" id="accCompany">—</span></div>
 
-    <div class="field">
+    <div class="field" id="field-lang">
+      <label>Idioma</label>
+      <div class="langseg" id="langSeg">
+        <button type="button" class="langopt" id="langPT">🇧🇷 Português</button>
+        <button type="button" class="langopt" id="langES">🇪🇸 Español</button>
+      </div>
+      <div class="hint">Escolha o idioma do app e das mensagens.</div>
+    </div>
+
+    <div class="field" id="field-name">
       <label>Seu nome</label>
       <input type="text" id="userName" placeholder="Como quer ser chamado?" maxlength="30" />
       <div class="hint">O app vai te cumprimentar pelo nome ao abrir.</div>
     </div>
 
-    <div class="field">
+    <div class="field" id="field-seg">
       <label>Seu segmento</label>
       <select id="segSelect"></select>
       <div class="hint">Personalize as mensagens pelo seu ramo de atuação.</div>
@@ -260,15 +280,17 @@
       <div class="hint">Um empurrãozinho diário às 8h para abrir o app e começar motivado. No iPhone, adicione o app à tela de início primeiro.</div>
     </div>
 
-    <div class="field">
+    <div class="field" id="field-license">
       <label>Chave de licença da empresa</label>
       <input type="text" id="licenseKey" placeholder="EX: EMPRESA-2026" />
       <button class="btn fill" id="btnApplyLicense" style="margin-top:10px">Aplicar licença</button>
       <div class="hint">Recebeu uma chave da sua empresa? Digite aqui para ativar as cores, o logo e o acompanhamento da equipe. Sem chave, você usa a versão livre.</div>
     </div>
 
-    <div class="field">
-      <div style="background:linear-gradient(120deg,var(--c1),var(--c2));border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:13px"><div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.22);border:1px dashed rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex:none">＋</div><div><b style="color:#fff;font-family:var(--brandfont);font-size:14px;display:block;line-height:1.15">Sua Empresa</b><span style="color:rgba(255,255,255,.82);font-size:11px">o app com a identidade de vocês</span></div></div><p style="font-family:var(--brandfont);font-weight:700;font-size:16px;margin:0 0 6px;color:var(--ink)">Quer o app com a cara da sua empresa?</p><p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 13px">Transforme na ferramenta oficial de motivação do seu time, com a identidade da sua empresa. As mensagens continuam gratuitas.</p><a class="btn fill" href="contratar.html" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">✨ Deixar com a cara da minha empresa</a>
+    <div class="field" id="field-company">
+      <label>Sua empresa ainda não tem?</label>
+      <a class="btn fill" href="contratar.html" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">✨ Personalizar para minha empresa</a>
+      <div class="hint">Deixe o app com o logo, as cores e o nome da sua empresa para todo o time. As mensagens continuam gratuitas.</div>
     </div>
 
     <button class="btn line" id="btnReset">Voltar para a versão livre</button>
@@ -330,7 +352,213 @@ const store = {
 const $ = _0x566131 => document.getElementById(_0x566131);
 const loadingScreen = $("loadingScreen");
 const appEl = $("app");
-const SEGMENTOS = [["geral", "✨ Geral (todos os segmentos)"], ["varejo", "🛍️ Varejo / Loja"], ["imobiliario", "🏠 Imobiliário"], ["seguros", "🛡️ Seguros / Financeiro"], ["automoveis", "🚗 Automóveis / Concessionária"], ["aluguel", "🚙 Aluguel de carros / Locadora"], ["tecnologia", "💻 Tecnologia / SaaS"], ["saude", "⚕️ Farmacêutico / Saúde"], ["telecom", "📡 Telecom / Assinaturas"], ["agro", "🌾 Agronegócio"], ["servicos", "🤝 Serviços / Consultoria"], ["moda", "👗 Moda / Beleza"]];
+/* ===================== i18n (PT / ES) — Pacote 2 ===================== */
+let LANG = store.get("mv_lang") === "es" ? "es" : "pt";
+const SEG_KEYS = ["geral", "varejo", "imobiliario", "seguros", "automoveis", "aluguel", "tecnologia", "saude", "telecom", "agro", "servicos", "moda"];
+const SEG_LABELS = {
+  pt: { geral: "✨ Geral (todos os segmentos)", varejo: "🛍️ Varejo / Loja", imobiliario: "🏠 Imobiliário", seguros: "🛡️ Seguros / Financeiro", automoveis: "🚗 Automóveis / Concessionária", aluguel: "🚙 Aluguel de carros / Locadora", tecnologia: "💻 Tecnologia / SaaS", saude: "⚕️ Farmacêutico / Saúde", telecom: "📡 Telecom / Assinaturas", agro: "🌾 Agronegócio", servicos: "🤝 Serviços / Consultoria", moda: "👗 Moda / Beleza" },
+  es: { geral: "✨ General (todos los segmentos)", varejo: "🛍️ Comercio / Tienda", imobiliario: "🏠 Inmobiliario", seguros: "🛡️ Seguros / Financiero", automoveis: "🚗 Automóviles / Concesionaria", aluguel: "🚙 Alquiler de autos / Rentadora", tecnologia: "💻 Tecnología / SaaS", saude: "⚕️ Farmacéutico / Salud", telecom: "📡 Telecom / Suscripciones", agro: "🌾 Agronegocio", servicos: "🤝 Servicios / Consultoría", moda: "👗 Moda / Belleza" }
+};
+function segLabel(_k) { return (SEG_LABELS[LANG] || SEG_LABELS.pt)[_k] || (SEG_LABELS.pt[_k] || _k); }
+function buildSegmentos() { return SEG_KEYS.map(_k => [_k, segLabel(_k)]); }
+let SEGMENTOS = buildSegmentos();
+const I18N = {
+  pt: {
+    loadMsg: "Preparando sua dose diária de motivação…",
+    loadErr: "Não consegui conectar agora. Verifique sua internet e tente novamente.",
+    retry: "Tentar novamente",
+    defaultTag: "Sua dose diária de motivação",
+    loadingMsg: "Carregando…",
+    btnRandom: "Nova mensagem",
+    btnShareImg: "Compartilhar imagem",
+    btnShareImgTitle: "Compartilhar como imagem",
+    copyTitle: "Copiar texto",
+    favTitle: "Favoritar",
+    installBtn: "Instalar app no celular",
+    installIphone: "📲 Como instalar no iPhone",
+    footSuffix: " · sua motivação para vender mais 💪",
+    footHint: "Toque em ⚙️ para escolher o segmento e a licença",
+    settings: "Configurações",
+    company: "Empresa",
+    free: " (livre)",
+    yourName: "Seu nome",
+    yourNamePh: "Como quer ser chamado?",
+    yourNameHint: "O app vai te cumprimentar pelo nome ao abrir.",
+    yourSeg: "Seu segmento",
+    yourSegHint: "Personalize as mensagens pelo seu ramo de atuação.",
+    lang: "Idioma",
+    langHint: "Escolha o idioma do app e das mensagens.",
+    notifyLabel: "Notificação diária",
+    notifyOff: "Receba um lembrete todo dia às 8h",
+    notifyOn: "Ativada — todo dia às 8h",
+    notifyHint: "Um empurrãozinho diário às 8h para abrir o app e começar motivado. No iPhone, adicione o app à tela de início primeiro.",
+    licenseLabel: "Chave de licença da empresa",
+    licensePh: "EX: EMPRESA-2026",
+    licenseBtn: "Aplicar licença",
+    licenseHint: "Recebeu uma chave da sua empresa? Digite aqui para ativar as cores, o logo e o acompanhamento da equipe. Sem chave, você usa a versão livre.",
+    noCompany: "Sua empresa ainda não tem?",
+    personalize: "✨ Personalizar para minha empresa",
+    personalizeHint: "Deixe o app com o logo, as cores e o nome da sua empresa para todo o time. As mensagens continuam gratuitas.",
+    reset: "Voltar para a versão livre",
+    favTitleDrawer: "⭐ Favoritos",
+    favEmpty: "Você ainda não favoritou nenhuma mensagem.<br>Toque na estrela ⭐ ao ler uma mensagem que curtir para guardá-la aqui.",
+    favSavedN: "mensagens salvas",
+    favSaved1: "mensagem salva",
+    copy: "Copiar",
+    remove: "Remover",
+    streakGo: "Comece hoje sua sequência!",
+    greetM: "Bom dia", greetA: "Boa tarde", greetN: "Boa noite",
+    locale: "pt-BR"
+  },
+  es: {
+    loadMsg: "Preparando tu dosis diaria de motivación…",
+    loadErr: "No pude conectar ahora. Revisa tu internet e inténtalo de nuevo.",
+    retry: "Intentar de nuevo",
+    defaultTag: "Tu dosis diaria de motivación",
+    loadingMsg: "Cargando…",
+    btnRandom: "Nueva frase",
+    btnShareImg: "Compartir imagen",
+    btnShareImgTitle: "Compartir como imagen",
+    copyTitle: "Copiar texto",
+    favTitle: "Guardar",
+    installBtn: "Instalar la app en el celular",
+    installIphone: "📲 Cómo instalar en iPhone",
+    footSuffix: " · tu motivación para vender más 💪",
+    footHint: "Toca ⚙️ para elegir el segmento y la licencia",
+    settings: "Configuración",
+    company: "Empresa",
+    free: " (libre)",
+    yourName: "Tu nombre",
+    yourNamePh: "¿Cómo quieres que te llamemos?",
+    yourNameHint: "La app te saludará por tu nombre al abrir.",
+    yourSeg: "Tu segmento",
+    yourSegHint: "Personaliza las frases según tu rubro.",
+    lang: "Idioma",
+    langHint: "Elige el idioma de la app y de las frases.",
+    notifyLabel: "Notificación diaria",
+    notifyOff: "Recibe un recordatorio cada día a las 8h",
+    notifyOn: "Activada — cada día a las 8h",
+    notifyHint: "Un empujoncito diario a las 8h para abrir la app y empezar con energía. En iPhone, agrega primero la app a la pantalla de inicio.",
+    licenseLabel: "Clave de licencia de la empresa",
+    licensePh: "EJ: EMPRESA-2026",
+    licenseBtn: "Aplicar licencia",
+    licenseHint: "¿Recibiste una clave de tu empresa? Escríbela aquí para activar los colores, el logo y el seguimiento del equipo. Sin clave, usas la versión libre.",
+    noCompany: "¿Tu empresa aún no la tiene?",
+    personalize: "✨ Personalizar para mi empresa",
+    personalizeHint: "Deja la app con el logo, los colores y el nombre de tu empresa para todo el equipo. Las frases siguen siendo gratis.",
+    reset: "Volver a la versión libre",
+    favTitleDrawer: "⭐ Favoritos",
+    favEmpty: "Aún no guardaste ninguna frase.<br>Toca la estrella ⭐ al leer una frase que te guste para guardarla aquí.",
+    favSavedN: "frases guardadas",
+    favSaved1: "frase guardada",
+    copy: "Copiar",
+    remove: "Eliminar",
+    streakGo: "¡Empieza hoy tu racha!",
+    greetM: "Buenos días", greetA: "Buenas tardes", greetN: "Buenas noches",
+    locale: "es"
+  }
+};
+function t(_k) { const _d = I18N[LANG] || I18N.pt; return _d[_k] != null ? _d[_k] : (I18N.pt[_k] != null ? I18N.pt[_k] : _k); }
+const TOAST_ES = {
+  "📋 Copiado!": "📋 ¡Copiado!",
+  "Não foi possível copiar": "No se pudo copiar",
+  "⭐ Favoritada!": "⭐ ¡Guardada!",
+  "Já está nos favoritos": "Ya está en favoritos",
+  "Removida dos favoritos": "Eliminada de favoritos",
+  "🖼️ Gerando imagem…": "🖼️ Generando imagen…",
+  "🖼️ Imagem salva!": "🖼️ ¡Imagen guardada!",
+  "Não foi possível gerar a imagem": "No se pudo generar la imagen",
+  "🔔 Notificação diária ativada!": "🔔 ¡Notificación diaria activada!",
+  "Notificação desativada": "Notificación desactivada",
+  "Não foi possível ativar agora": "No se pudo activar ahora",
+  "Não foi possível ativar a notificação": "No se pudo activar la notificación",
+  "Permissão de notificação negada": "Permiso de notificación denegado",
+  "Seu navegador não suporta notificações aqui": "Tu navegador no admite notificaciones aquí",
+  "Digite a chave da licença": "Escribe la clave de la licencia",
+  "Chave inválida ou inativa": "Clave inválida o inactiva",
+  "Erro ao aplicar chave": "Error al aplicar la clave",
+  "Licença da empresa inativa. Fale com o administrador.": "Licencia de la empresa inactiva. Habla con el administrador.",
+  "Não foi possível carregar. Tente novamente.": "No se pudo cargar. Inténtalo de nuevo.",
+  "Sem conexão no momento.": "Sin conexión en este momento.",
+  "📴 Sem conexão — mostrando a última mensagem.": "📴 Sin conexión — mostrando la última frase.",
+  "✅ App instalado!": "✅ ¡App instalada!",
+  "No iPhone: toque em Compartilhar ⬆️ e 'Adicionar à Tela de Início'": "En iPhone: toca Compartir ⬆️ y 'Agregar a pantalla de inicio'"
+};
+function tr(_m) { return LANG === "es" && TOAST_ES[_m] ? TOAST_ES[_m] : _m; }
+function applyStaticI18n() {
+  try { document.documentElement.setAttribute("lang", LANG === "es" ? "es" : "pt-BR"); } catch (e) {}
+  const S = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  const P = (id, v) => { const el = $(id); if (el) el.setAttribute("placeholder", v); };
+  const T = (id, v) => { const el = $(id); if (el) el.setAttribute("title", v); };
+  const setBtnText = (id, txt) => { const el = $(id); if (!el) return; const tn = [].slice.call(el.childNodes).filter(n => n.nodeType === 3).pop(); if (tn) tn.textContent = txt; else el.appendChild(document.createTextNode(txt)); };
+  const setLabHint = (fieldId, labKey, hintKey) => {
+    const f = document.getElementById(fieldId); if (!f) return;
+    const lab = f.querySelector("label"); if (lab && labKey) lab.textContent = t(labKey);
+    // usa a ÚLTIMA .hint (a descritiva); no notifyField a primeira .hint é o #notifyState
+    const hints = f.querySelectorAll(".hint"); const hint = hints[hints.length - 1];
+    if (hint && hintKey) hint.textContent = t(hintKey);
+  };
+  // loading screen
+  S("loadMsg", t("loadMsg"));
+  S("btnRetry", t("retry"));
+  // mensagem inicial (placeholder de carregamento), antes do servidor responder
+  const msgEl = $("message"); if (msgEl) { const cur = (msgEl.textContent || "").trim(); if (cur === "Carregando…" || cur === "Cargando…" || cur === "") msgEl.textContent = t("loadingMsg"); }
+  const le = $("loadErr"); if (le) { const p = le.querySelector("p"); if (p) p.textContent = t("loadErr"); }
+  // card buttons
+  setBtnText("btnRandom", t("btnRandom"));
+  setBtnText("btnShareImg", t("btnShareImg")); T("btnShareImg", t("btnShareImgTitle"));
+  T("btnCopy", t("copyTitle")); const bc = $("btnCopy"); if (bc) bc.setAttribute("aria-label", t("copyTitle"));
+  T("btnFav", t("favTitle")); const bf = $("btnFav"); if (bf) bf.setAttribute("aria-label", t("favTitle"));
+  // footer hint
+  const footSpan = document.querySelector(".foot span"); if (footSpan) footSpan.textContent = t("footHint");
+  // settings drawer
+  const dh = document.querySelector("#drawer .dh h2"); if (dh) dh.textContent = t("settings");
+  const compK = document.querySelector("#drawer .row .k"); if (compK) compK.textContent = t("company");
+  // re-localiza o sufixo "(livre)"/"(libre)" no valor da empresa
+  const ac = $("accCompany"); if (ac) { let s = (ac.textContent || ""); const wasFree = /\((livre|libre)\)\s*$/.test(s); s = s.replace(/\s*\((livre|libre)\)\s*$/, ""); ac.textContent = s + (wasFree ? t("free") : ""); }
+  P("userName", t("yourNamePh"));
+  P("licenseKey", t("licensePh"));
+  setLabHint("field-name", "yourName", "yourNameHint");
+  setLabHint("field-seg", "yourSeg", "yourSegHint");
+  setLabHint("field-lang", "lang", "langHint");
+  setLabHint("notifyField", "notifyLabel", "notifyHint");
+  setLabHint("field-license", "licenseLabel", "licenseHint");
+  setLabHint("field-company", "noCompany", "personalizeHint");
+  S("btnApplyLicense", t("licenseBtn"));
+  const perLink = document.querySelector("#field-company a"); if (perLink) perLink.textContent = t("personalize");
+  S("btnReset", t("reset"));
+  const fdh = document.querySelector("#favDrawer .dh h2"); if (fdh) fdh.textContent = t("favTitleDrawer");
+  // notify state (only when currently off; the live check overwrites when on)
+  const ns = $("notifyState"), nt = $("notifyToggle"); if (ns && nt && !nt.classList.contains("on")) ns.textContent = t("notifyOff");
+  // brandTag default (only while showing the built-in default — free version)
+  const bt = $("brandTag"); if (bt) { const cur = (bt.textContent || "").trim(); if (cur === I18N.pt.defaultTag || cur === I18N.es.defaultTag || cur === "") bt.textContent = t("defaultTag"); }
+  // install button (keeps svg on non-iphone; iphone variant is text-only)
+  const ib = $("installBtn");
+  if (ib) { if (ib.querySelector("svg")) { setBtnText("installBtn", t("installBtn")); } else { ib.textContent = t("installIphone"); } }
+  // language switcher active state
+  const lp = $("langPT"), lse = $("langES");
+  if (lp && lse) { lp.classList.toggle("on", LANG === "pt"); lse.classList.toggle("on", LANG === "es"); }
+  // quick toggle in header shows the OTHER language (the one you'd switch to)
+  const lq = $("langQuickLabel"); if (lq) lq.textContent = LANG === "es" ? "PT" : "ES";
+}
+async function switchLang(_lang) {
+  _lang = _lang === "es" ? "es" : "pt";
+  if (_lang === LANG) return;
+  LANG = _lang;
+  store.set("mv_lang", LANG);
+  SEGMENTOS = buildSegmentos();
+  applyStaticI18n();
+  // repopula o seletor de segmento com os rótulos no novo idioma
+  try { _0x1ca475(); } catch (e) {}
+  // atualiza sequência e saudação
+  try { if (window.__mvPaintStreak) window.__mvPaintStreak(); } catch (e) {}
+  try { if (window.__mvPaintGreet) window.__mvPaintGreet(); } catch (e) {}
+  // avisa o patch (override) para retraduzir seus cartões
+  try { window.dispatchEvent(new CustomEvent("mv:langchange", { detail: { lang: LANG } })); } catch (e) {}
+  // grava preferência no servidor (apaga mv_today) e recarrega a mensagem do dia no novo idioma
+  try { await sb.rpc("set_lang", { p_lang: LANG }); } catch (e) {}
+  try { _0x2f40f7(); } catch (e) {}
+}
 let _0x2a5694 = store.get("mv_seg") || "geral";
 let _0x2fa62e = "";
 let _0x57ab35 = [];
@@ -338,7 +566,7 @@ let _0x2e681a = false;
 let _0x51a10f;
 function _0x52c19d(_0x4b325c) {
   const _0x38d50b = $("toast");
-  _0x38d50b.textContent = _0x4b325c;
+  _0x38d50b.textContent = tr(_0x4b325c);
   _0x38d50b.classList.add("show");
   clearTimeout(_0x51a10f);
   _0x51a10f = setTimeout(() => _0x38d50b.classList.remove("show"), 2600);
@@ -348,7 +576,7 @@ function _0x8d093f() {
   loadingScreen.classList.remove("hidden");
   $("spin").classList.remove("hidden");
   $("loadErr").classList.add("hidden");
-  $("loadMsg").textContent = "Preparando sua dose diária de motivação…";
+  $("loadMsg").textContent = t("loadMsg");
 }
 function _0x33f9fd() {
   $("spin").classList.add("hidden");
@@ -416,7 +644,7 @@ function _0x594fea(_0x2560b4) {
   if (_0x457472) {
     return _0x457472[1];
   } else {
-    return "✨ Geral";
+    return segLabel("geral");
   }
 }
 async function _0x5e8e35() {
@@ -442,8 +670,8 @@ async function _0x5e8e35() {
   document.querySelector("meta[name=theme-color]").setAttribute("content", _0x534819(_0x1ce0c5.c1) ? _0x1ce0c5.c1 : "#6d28d9");
   $("brandName").textContent = _0x1ce0c5.company_name || "Motiva Vendas";
   $("footBrand").textContent = _0x1ce0c5.company_name || "Motiva Vendas";
-  $("brandTag").textContent = _0x1ce0c5.tagline || "Sua dose diária de motivação";
-  $("accCompany").textContent = (_0x1ce0c5.company_name || "Motiva Vendas") + (_0x1ce0c5.is_public ? " (livre)" : "");
+  $("brandTag").textContent = _0x1ce0c5.tagline || t("defaultTag");
+  $("accCompany").textContent = (_0x1ce0c5.company_name || "Motiva Vendas") + (_0x1ce0c5.is_public ? t("free") : "");
   const _0x464912 = $("logoBox");
   const _0x458395 = "<svg viewBox=\"0 0 240 240\" width=\"30\" height=\"30\"><path d=\"M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z\" fill=\"#ffffff\"/><path d=\"M132 58 L96 120 H120 L112 172 L156 104 H130 Z\" fill=\"#f59e0b\"/></svg>";
   if (_0x1ce0c5.logo_url && /^(data:image\/|https:\/\/)/i.test(_0x1ce0c5.logo_url)) {
@@ -461,7 +689,7 @@ function _0x378298(_0xfe0d1) {
   return _0xfe0d1.charAt(0).toUpperCase() + _0xfe0d1.slice(1);
 }
 function _0xfcb9c9() {
-  return new Date().toLocaleDateString("pt-BR", {
+  return new Date().toLocaleDateString(t("locale"), {
     weekday: "long",
     day: "numeric",
     month: "long"
@@ -607,7 +835,7 @@ async function _0xf9fdf9(_0xd4d2b9) {
   }
   _0x457ca4 = _0x23ab3a;
   store.set("mv_lastBonusStreak", String(_0xd4d2b9));
-  _0x702f6c(_0x23ab3a, false, "🎁 Bônus de " + _0xd4d2b9 + " dias seguidos!", true);
+  _0x702f6c(_0x23ab3a, false, (LANG === "es" ? "🎁 ¡Bono de " + _0xd4d2b9 + " días seguidos!" : "🎁 Bônus de " + _0xd4d2b9 + " dias seguidos!"), true);
 }
 $("segSelect").onchange = _0x291ce7 => {
   _0x2a5694 = _0x291ce7.target.value;
@@ -727,7 +955,7 @@ async function _0x1c2eaa() {
     _0x48db33.fillText(_0x18a5a6, 196, 128);
     _0x48db33.font = "500 26px Poppins, sans-serif";
     _0x48db33.fillStyle = "rgba(255,255,255,.82)";
-    _0x48db33.fillText("Sua dose diária de motivação", 196, 168);
+    _0x48db33.fillText(t("defaultTag"), 196, 168);
     let _0x21416a = _0x4bddfd.length > 200 ? 50 : _0x4bddfd.length > 140 ? 58 : _0x4bddfd.length > 80 ? 68 : 82;
     _0x48db33.fillStyle = "#fff";
     _0x48db33.font = "700 " + _0x21416a + "px Poppins, sans-serif";
@@ -802,10 +1030,22 @@ function _0x4fdd5d() {
   }
   store.set("mv_lastDay", String(_0x247873));
   store.set("mv_streak", String(_0x519c61));
-  const _0x164288 = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/></svg>";
-  $("streak").innerHTML = _0x164288 + "<span>" + (_0x519c61 > 1 ? _0x519c61 + " dias seguidos de motivação!" : "Comece hoje sua sequência!") + "</span>";
+  _0x1caPaintStreak(_0x519c61);
   return _0x519c61;
 }
+const _0xStreakSvg = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/></svg>";
+function streakText(_n) {
+  if (_n > 1) { return LANG === "es" ? (_n + " días seguidos de motivación!") : (_n + " dias seguidos de motivação!"); }
+  return t("streakGo");
+}
+function _0x1caPaintStreak(_n) {
+  const el = $("streak"); if (!el) return;
+  el.innerHTML = _0xStreakSvg + "<span>" + streakText(_n) + "</span>";
+}
+window.__mvPaintStreak = function () {
+  let _n = 0; try { _n = parseInt(store.get("mv_streak") || "0", 10) || 0; } catch (e) {}
+  _0x1caPaintStreak(_n);
+};
 const _0x473af5 = $("drawer");
 const _0x3ee554 = $("overlay");
 const _0x347ee0 = $("favDrawer");
@@ -846,13 +1086,13 @@ function _0x48526e() {
   if (!_0x438bfe.length) {
     const _0x1f0257 = document.createElement("div");
     _0x1f0257.className = "favempty";
-    _0x1f0257.innerHTML = "<span class=\"bigstar\">⭐</span>Você ainda não favoritou nenhuma mensagem.<br>Toque na estrela ⭐ ao ler uma mensagem que curtir para guardá-la aqui.";
+    _0x1f0257.innerHTML = "<span class=\"bigstar\">⭐</span>" + t("favEmpty");
     _0x3baf22.appendChild(_0x1f0257);
     return;
   }
   const _0x2414e5 = document.createElement("p");
   _0x2414e5.className = "favcount";
-  _0x2414e5.textContent = _0x438bfe.length + (_0x438bfe.length > 1 ? " mensagens salvas" : " mensagem salva");
+  _0x2414e5.textContent = _0x438bfe.length + " " + (_0x438bfe.length > 1 ? t("favSavedN") : t("favSaved1"));
   _0x3baf22.appendChild(_0x2414e5);
   _0x438bfe.forEach((_0x2eed3d, _0x474807) => {
     const _0x24573e = document.createElement("div");
@@ -864,7 +1104,7 @@ function _0x48526e() {
     _0x2b312d.className = "fbar";
     const _0x1624f0 = document.createElement("button");
     _0x1624f0.className = "fbtn cp";
-    _0x1624f0.textContent = "Copiar";
+    _0x1624f0.textContent = t("copy");
     _0x1624f0.onclick = async () => {
       try {
         await navigator.clipboard.writeText(_0x2eed3d + "\n\n— " + $("brandName").textContent);
@@ -882,8 +1122,8 @@ function _0x48526e() {
     };
     const _0x70018f = document.createElement("button");
     _0x70018f.className = "fbtn rm";
-    _0x70018f.title = "Remover";
-    _0x70018f.setAttribute("aria-label", "Remover");
+    _0x70018f.title = t("remove");
+    _0x70018f.setAttribute("aria-label", t("remove"));
     _0x70018f.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/></svg>";
     _0x70018f.onclick = () => {
       const _0x54d6af = _0x282811();
@@ -942,7 +1182,7 @@ async function _0x3c2fa0() {
   const _0x1255f0 = $("notifyToggle");
   _0x1255f0.classList.toggle("on", _0x443c53);
   _0x1255f0.setAttribute("aria-checked", _0x443c53 ? "true" : "false");
-  $("notifyState").textContent = _0x443c53 ? "Ativada — todo dia às 8h" : "Receba um lembrete todo dia às 8h";
+  $("notifyState").textContent = _0x443c53 ? t("notifyOn") : t("notifyOff");
 }
 async function _0x4a10c6() {
   try {
@@ -1031,7 +1271,7 @@ $("btnApplyLicense").onclick = async () => {
     _0x52c19d(/invalid_license/.test((_0x27cdd5.message || "") + (_0x27cdd5.details || "")) ? "Chave inválida ou inativa" : "Erro ao aplicar chave");
     return;
   }
-  _0x52c19d("✅ Licença ativada: " + _0x37b5a4[0].company_name);
+  _0x52c19d((LANG === "es" ? "✅ Licencia activada: " : "✅ Licença ativada: ") + _0x37b5a4[0].company_name);
   $("licenseKey").value = "";
   await _0x5e8e35();
   _0x2f40f7();
@@ -1077,24 +1317,58 @@ _0x502f6c.onclick = async () => {
   }
 };
 if (_0x34a005 && !_0x405c11) {
-  _0x502f6c.textContent = "📲 Como instalar no iPhone";
+  _0x502f6c.textContent = t("installIphone");
   _0x502f6c.classList.add("show");
 }
+
+/* ===== Wiring do seletor de idioma (Pacote 2) ===== */
+if ($("langPT")) $("langPT").onclick = () => switchLang("pt");
+if ($("langES")) $("langES").onclick = () => switchLang("es");
+if ($("langQuick")) $("langQuick").onclick = () => switchLang(LANG === "es" ? "pt" : "es");
+applyStaticI18n();
 </script>
 <script>
 (function(){
+  function curLang(){ try{ return localStorage.getItem("mv_lang")==="es" ? "es" : "pt"; }catch(e){ return "pt"; } }
   function getName(){ try{ return (localStorage.getItem("mv_name")||"").trim(); }catch(e){ return ""; } }
   function setName(v){ try{ localStorage.setItem("mv_name", v); }catch(e){} }
   function firstName(n){ n=(n||"").trim(); if(!n) return ""; var f=n.split(/\s+/)[0]; return f.charAt(0).toUpperCase()+f.slice(1); }
-  function greeting(n){ var f=firstName(n); if(!f) return ""; var h=new Date().getHours(); var p=h<12?"Bom dia":(h<18?"Boa tarde":"Boa noite"); return p+", "+f+"! 👋"; }
+  function greeting(n){
+    var f=firstName(n); if(!f) return "";
+    var h=new Date().getHours();
+    var p;
+    if(curLang()==="es"){ p = h<12?"Buenos días":(h<20?"Buenas tardes":"Buenas noches"); }
+    else { p = h<12?"Bom dia":(h<18?"Boa tarde":"Boa noite"); }
+    return p+", "+f+"! 👋";
+  }
   function paint(){ var el=document.getElementById("greet"); if(!el) return; var t=greeting(getName()); el.textContent=t; el.style.display=t?"block":"none"; }
   var inp=document.getElementById("userName");
   if(inp){ inp.value=getName(); inp.addEventListener("input", function(){ setName(inp.value.trim()); paint(); }); }
+  window.__mvPaintGreet = paint;
   paint();
 })();
 </script>
-
 <script>
+/* ==========================================================================
+   i18n do patch (Pacote 2) — lê o idioma escolhido (mv_lang) e retraduz os
+   cartões injetados (lead, notificação, sequência, rodapé) ao trocar de idioma.
+   ========================================================================== */
+(function () {
+  window.__mvLang = function () {
+    try { return localStorage.getItem("mv_lang") === "es" ? "es" : "pt"; } catch (e) { return "pt"; }
+  };
+  window.__mvT = function (dict) {
+    var l = window.__mvLang();
+    return (dict && dict[l] != null) ? dict[l] : (dict ? dict.pt : "");
+  };
+  // registro de callbacks que reconstroem/retraduzem cartões ao trocar idioma
+  window.__mvRelocalizers = window.__mvRelocalizers || [];
+  window.__mvOnLang = function (fn) { try { window.__mvRelocalizers.push(fn); } catch (e) {} };
+  window.addEventListener("mv:langchange", function () {
+    (window.__mvRelocalizers || []).forEach(function (fn) { try { fn(); } catch (e) {} });
+  });
+})();
+
 /* ==========================================================================
    Motiva Vendas — patch aditivo (não altera o app ofuscado)
    Corrige: (2) imagem de compartilhar usa o LOGO da empresa + slogan condicional
@@ -1403,38 +1677,68 @@ if (_0x34a005 && !_0x405c11) {
       document.head.appendChild(s);
     }
 
+    var LTXT={
+      ctaTitle:{pt:"✨ Quer uma versão mais elaborada?",es:"✨ ¿Quieres una versión más elaborada?"},
+      ctaSub:{pt:"Receba agora uma reflexão mais profunda da mensagem de hoje, direto no seu WhatsApp.",es:"Recibe ahora una reflexión más profunda de la frase de hoy, directo en tu WhatsApp."},
+      ctaBtn:{pt:"Quero receber",es:"Quiero recibirla"},
+      close:{pt:"Fechar",es:"Cerrar"},
+      mTitle:{pt:"Receba sua mensagem elaborada ✨",es:"Recibe tu frase elaborada ✨"},
+      mSub:{pt:"Deixe seu WhatsApp e a gente te manda uma versão mais profunda pra fechar o dia com força.",es:"Déjanos tu WhatsApp y te enviamos una versión más profunda para cerrar el día con fuerza."},
+      lWpp:{pt:"WhatsApp (com DDD)",es:"WhatsApp (con código de área)"},
+      phWpp:{pt:"(31) 99999-9999",es:"Tu WhatsApp con código de país"},
+      lName:{pt:"Seu nome",es:"Tu nombre"},
+      optional:{pt:"(opcional)",es:"(opcional)"},
+      phName:{pt:"Como te chamam?",es:"¿Cómo te llaman?"},
+      lWork:{pt:"Onde você trabalha?",es:"¿Dónde trabajas?"},
+      phWork:{pt:"Nome da empresa",es:"Nombre de la empresa"},
+      consent:{pt:"Li e aceito a <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidade</a> e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.",es:"Leí y acepto la <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidad</a> y autorizo a Motiva Vendas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."},
+      submit:{pt:"Receber minha mensagem",es:"Recibir mi frase"},
+      priv:{pt:"🔒 Seus dados ficam seguros. Você pode parar de receber quando quiser.",es:"🔒 Tus datos están seguros. Puedes dejar de recibir cuando quieras."},
+      sending:{pt:"Enviando…",es:"Enviando…"},
+      okToast:{pt:"💜 Pronto! Aqui está sua mensagem elaborada.",es:"💜 ¡Listo! Aquí está tu frase elaborada."},
+      failToast:{pt:"Não consegui salvar agora. Tente de novo.",es:"No pude guardar ahora. Inténtalo de nuevo."},
+      elabBadge:{pt:"✨ Sua mensagem elaborada",es:"✨ Tu frase elaborada"}
+    };
+    var T=function(d){ return window.__mvT(d); };
     function buildCta(){
       if($("mvCta")) return;
       var card=document.createElement("div");
       card.className="mvcta"; card.id="mvCta";
-      card.innerHTML='<button class="mvcta-x" id="mvCtaX" aria-label="Fechar">×</button>'
-        +'<div class="mvcta-t">✨ Quer uma versão mais elaborada?</div>'
-        +'<div class="mvcta-s">Receba agora uma reflexão mais profunda da mensagem de hoje, direto no seu WhatsApp.</div>'
-        +'<button class="mvcta-b" id="mvCtaB">Quero receber</button>';
+      card.innerHTML='<button class="mvcta-x" id="mvCtaX" aria-label="'+T(LTXT.close)+'">×</button>'
+        +'<div class="mvcta-t">'+T(LTXT.ctaTitle)+'</div>'
+        +'<div class="mvcta-s">'+T(LTXT.ctaSub)+'</div>'
+        +'<button class="mvcta-b" id="mvCtaB">'+T(LTXT.ctaBtn)+'</button>';
       var foot=document.querySelector(".foot");
       if(foot && foot.parentNode){ foot.parentNode.insertBefore(card, foot); }
       else { (document.getElementById("app")||document.body).appendChild(card); }
       $("mvCtaX").onclick=function(){ try{localStorage.setItem("mv_lead_hide","1");}catch(e){} card.remove(); };
       $("mvCtaB").onclick=openModal;
     }
+    function relocalizeCta(){
+      var c=$("mvCta"); if(!c) return;
+      var tt=c.querySelector(".mvcta-t"); if(tt) tt.textContent=T(LTXT.ctaTitle);
+      var ss=c.querySelector(".mvcta-s"); if(ss) ss.textContent=T(LTXT.ctaSub);
+      var bb=$("mvCtaB"); if(bb) bb.textContent=T(LTXT.ctaBtn);
+    }
+    window.__mvOnLang(relocalizeCta);
 
     function buildModal(){
       if($("mvModal")) return;
       var m=document.createElement("div");
       m.className="mvmodal-ov"; m.id="mvModal";
       m.innerHTML='<div class="mvmodal">'
-        +'<button class="mvmodal-x" id="mvMX" aria-label="Fechar">×</button>'
-        +'<div class="mvmodal-t">Receba sua mensagem elaborada ✨</div>'
-        +'<div class="mvmodal-s">Deixe seu WhatsApp e a gente te manda uma versão mais profunda pra fechar o dia com força.</div>'
-        +'<label class="mvlbl">WhatsApp (com DDD)</label>'
-        +'<input class="mvinp" id="mvPhone" type="tel" inputmode="numeric" placeholder="(31) 99999-9999" autocomplete="tel">'
-        +'<label class="mvlbl">Seu nome <span>(opcional)</span></label>'
-        +'<input class="mvinp" id="mvName" type="text" placeholder="Como te chamam?" autocomplete="name">'
-        +'<label class="mvlbl">Onde você trabalha? <span>(opcional)</span></label>'
-        +'<input class="mvinp" id="mvWork" type="text" placeholder="Nome da empresa">'
-        +'<label class="mvchk"><input type="checkbox" id="mvConsent"> <span>Li e aceito a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.</span></label>'
-        +'<button class="mvsub" id="mvSub" disabled>Receber minha mensagem</button>'
-        +'<div class="mvpriv">🔒 Seus dados ficam seguros. Você pode parar de receber quando quiser.</div>'
+        +'<button class="mvmodal-x" id="mvMX" aria-label="'+T(LTXT.close)+'">×</button>'
+        +'<div class="mvmodal-t">'+T(LTXT.mTitle)+'</div>'
+        +'<div class="mvmodal-s">'+T(LTXT.mSub)+'</div>'
+        +'<label class="mvlbl">'+T(LTXT.lWpp)+'</label>'
+        +'<input class="mvinp" id="mvPhone" type="tel" inputmode="numeric" placeholder="'+T(LTXT.phWpp)+'" autocomplete="tel">'
+        +'<label class="mvlbl">'+T(LTXT.lName)+' <span>'+T(LTXT.optional)+'</span></label>'
+        +'<input class="mvinp" id="mvName" type="text" placeholder="'+T(LTXT.phName)+'" autocomplete="name">'
+        +'<label class="mvlbl">'+T(LTXT.lWork)+' <span>'+T(LTXT.optional)+'</span></label>'
+        +'<input class="mvinp" id="mvWork" type="text" placeholder="'+T(LTXT.phWork)+'">'
+        +'<label class="mvchk"><input type="checkbox" id="mvConsent"> <span>'+T(LTXT.consent)+'</span></label>'
+        +'<button class="mvsub" id="mvSub" disabled>'+T(LTXT.submit)+'</button>'
+        +'<div class="mvpriv">'+T(LTXT.priv)+'</div>'
         +'</div>';
       document.body.appendChild(m);
       function refresh(){ $("mvSub").disabled = !(digits($("mvPhone").value).length>=10 && $("mvConsent").checked); }
@@ -1456,26 +1760,28 @@ if (_0x34a005 && !_0x405c11) {
         var msg=r && r.data && r.data[0] && r.data[0].message;
         if(msg){
           var el=$("message"); if(el){ el.classList.remove("small","tiny"); if(msg.length>250) el.classList.add("tiny"); else if(msg.length>140) el.classList.add("small"); el.textContent=msg; }
-          var b=$("campaignBadge"); if(b){ b.textContent="✨ Sua mensagem elaborada"; b.classList.remove("hidden"); }
+          var b=$("campaignBadge"); if(b){ b.textContent=T(LTXT.elabBadge); b.classList.remove("hidden"); }
         }
       }catch(e){}
     }
 
     async function submit(){
-      var btn=$("mvSub"); btn.disabled=true; btn.textContent="Enviando…";
+      var btn=$("mvSub"); btn.disabled=true; btn.textContent=T(LTXT.sending);
       try{
         try{ await window.__mvAuthClient(sbL); }catch(e){}
-        var CONSENT_TXT="Li e aceito a Política de Privacidade e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.";
+        var CONSENT_TXT = window.__mvLang()==="es"
+          ? "Leí y acepto la Política de Privacidad y autorizo a Motiva Vendas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."
+          : "Li e aceito a Política de Privacidade e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.";
         var r=await sbL.rpc("save_lead",{ p_name:$("mvName").value, p_phone:$("mvPhone").value, p_workplace:$("mvWork").value, p_consent:true, p_consent_text:CONSENT_TXT, p_policy_version:"2026-08-21" });
         if(r.error) throw r.error;
         try{ localStorage.setItem("mv_lead_done","1"); }catch(e){}
         closeModal();
         var cta=$("mvCta"); if(cta) cta.remove();
-        toast("💜 Pronto! Aqui está sua mensagem elaborada.");
+        toast(T(LTXT.okToast));
         await showElaborated();
       }catch(e){
-        btn.disabled=false; btn.textContent="Receber minha mensagem";
-        toast("Não consegui salvar agora. Tente de novo.");
+        btn.disabled=false; btn.textContent=T(LTXT.submit);
+        toast(T(LTXT.failToast));
       }
     }
 
@@ -1506,20 +1812,22 @@ if (_0x34a005 && !_0x405c11) {
    ========================================================================== */
 (function () {
   try {
-    var DEFAULT_TAG = "sua dose diária de motivação";
-    var origFooterText = null;
+    var DEFAULTS = ["sua dose diária de motivação", "tu dosis diaria de motivación"];
+    var FOOT_SUFFIX = { pt: " · sua motivação para vender mais 💪", es: " · tu motivación para vender más 💪" };
+    function isDefaultTag(tag) { return !tag || DEFAULTS.indexOf(tag.toLowerCase()) !== -1; }
     function sync() {
       var bt = document.getElementById("brandTag");
       var fb = document.getElementById("footBrand");
       if (!bt || !fb) return;
       var node = fb.nextSibling; // nó de texto "· sua motivação para vender mais 💪"
       if (!node || node.nodeType !== 3) return;
-      if (origFooterText === null) origFooterText = node.textContent;
       var tag = (bt.textContent || "").trim();
-      if (tag && tag.toLowerCase() !== DEFAULT_TAG) {
+      if (!isDefaultTag(tag)) {
+        // frase PRÓPRIA da empresa contratada → espelha no rodapé
         node.textContent = " · " + tag + " ";
       } else {
-        node.textContent = origFooterText;
+        // versão livre → sufixo padrão do Motiva no idioma atual
+        node.textContent = window.__mvT(FOOT_SUFFIX);
       }
     }
     function start() {
@@ -1533,6 +1841,7 @@ if (_0x34a005 && !_0x405c11) {
       [400, 900, 1800, 3200].forEach(function (ms) { setTimeout(sync, ms); });
     }
     start();
+    window.__mvOnLang(sync);
     window.__mvSyncFooterTag = sync;
   } catch (e) {}
 })();
@@ -1578,12 +1887,28 @@ if (_0x34a005 && !_0x405c11) {
         im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
       });
     }
+    var ST = {
+      phr30: { pt: "Um mês sem falhar. Isso é atitude de campeão.", es: "Un mes sin fallar. Eso es actitud de campeón." },
+      phr14: { pt: "Duas semanas de constância. O resultado vem de quem não para.", es: "Dos semanas de constancia. El resultado llega a quien no para." },
+      phr7: { pt: "Uma semana seguida! Constância é o que separa quem vende de quem só tenta.", es: "¡Una semana seguida! La constancia separa a quien vende de quien solo lo intenta." },
+      phr5: { pt: "Sequência quente! Mantém o ritmo e a venda vem atrás.", es: "¡Racha encendida! Mantén el ritmo y la venta llega detrás." },
+      phr0: { pt: "Todo dia mais perto da minha meta.", es: "Cada día más cerca de mi meta." },
+      dayOne: { pt: "DIA SEGUIDO", es: "DÍA SEGUIDO" },
+      dayMany: { pt: "DIAS SEGUIDOS", es: "DÍAS SEGUIDOS" },
+      subtitle: { pt: "de motivação e foco em vendas", es: "de motivación y foco en ventas" },
+      cta: { pt: "Comece a sua sequência — é grátis", es: "Empieza tu racha — es gratis" },
+      btn: { pt: "Compartilhar sequência", es: "Compartir racha" },
+      gen: { pt: "🔥 Gerando sua sequência…", es: "🔥 Generando tu racha…" },
+      saved: { pt: "🔥 Imagem salva! Compartilhe com seu time.", es: "🔥 ¡Imagen guardada! Compártela con tu equipo." },
+      failimg: { pt: "Não foi possível gerar a imagem", es: "No se pudo generar la imagen" }
+    };
+    var STT = function (d) { return window.__mvT(d); };
     function phraseFor(n) {
-      if (n >= 30) return "Um mês sem falhar. Isso é atitude de campeão.";
-      if (n >= 14) return "Duas semanas de constância. O resultado vem de quem não para.";
-      if (n >= 7) return "Uma semana seguida! Constância é o que separa quem vende de quem só tenta.";
-      if (n >= 5) return "Sequência quente! Mantém o ritmo e a venda vem atrás.";
-      return "Todo dia mais perto da minha meta.";
+      if (n >= 30) return STT(ST.phr30);
+      if (n >= 14) return STT(ST.phr14);
+      if (n >= 7) return STT(ST.phr7);
+      if (n >= 5) return STT(ST.phr5);
+      return STT(ST.phr0);
     }
 
     async function buildStreakCanvas() {
@@ -1626,10 +1951,10 @@ if (_0x34a005 && !_0x405c11) {
       ctx.font = "800 320px Poppins, sans-serif";
       ctx.fillText(String(n), W / 2, 640);
       ctx.font = "700 62px Poppins, sans-serif";
-      ctx.fillText(n === 1 ? "DIA SEGUIDO" : "DIAS SEGUIDOS", W / 2, 800);
+      ctx.fillText(n === 1 ? STT(ST.dayOne) : STT(ST.dayMany), W / 2, 800);
       ctx.font = "500 34px Poppins, sans-serif";
       ctx.fillStyle = "rgba(255,255,255,.9)";
-      ctx.fillText("de motivação e foco em vendas", W / 2, 858);
+      ctx.fillText(STT(ST.subtitle), W / 2, 858);
 
       // frase
       ctx.fillStyle = "#f59e0b";
@@ -1645,7 +1970,7 @@ if (_0x34a005 && !_0x405c11) {
 
       // rodapé: chamada + site
       ctx.font = "600 30px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.92)";
-      ctx.fillText("Comece a sua sequência — é grátis", W / 2, H - 150);
+      ctx.fillText(STT(ST.cta), W / 2, H - 150);
       ctx.font = "700 40px Poppins, sans-serif"; ctx.fillStyle = "#fff";
       ctx.fillText("motivavendas.com.br", W / 2, H - 96);
       return cv;
@@ -1653,13 +1978,15 @@ if (_0x34a005 && !_0x405c11) {
 
     async function shareStreak() {
       var n = getStreak();
-      toast("🔥 Gerando sua sequência…");
+      toast(STT(ST.gen));
       try {
         var cv = await buildStreakCanvas();
         var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
-        var msg = "🔥 Estou há " + n + (n === 1 ? " dia" : " dias") + " seguidos me motivando pra vender mais no Motiva Vendas! Bora comigo? motivavendas.com.br";
+        var msg = window.__mvLang() === "es"
+          ? ("🔥 Llevo " + n + (n === 1 ? " día" : " días") + " seguidos motivándome para vender más en Motiva Vendas. ¿Te sumas? motivavendas.com.br")
+          : ("🔥 Estou há " + n + (n === 1 ? " dia" : " dias") + " seguidos me motivando pra vender mais no Motiva Vendas! Bora comigo? motivavendas.com.br");
         var blob = await new Promise(function (r) { cv.toBlob(r, "image/png", 0.95); });
-        if (!blob) { toast("Não foi possível gerar a imagem"); return; }
+        if (!blob) { toast(STT(ST.failimg)); return; }
         var file = new File([blob], "minha-sequencia.png", { type: "image/png" });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try { await navigator.share({ files: [file], text: msg, title: name }); } catch (e) {}
@@ -1668,9 +1995,9 @@ if (_0x34a005 && !_0x405c11) {
           var a = document.createElement("a"); a.href = url; a.download = "minha-sequencia.png";
           document.body.appendChild(a); a.click(); a.remove();
           setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
-          toast("🔥 Imagem salva! Compartilhe com seu time.");
+          toast(STT(ST.saved));
         }
-      } catch (e) { toast("Não foi possível gerar a imagem"); }
+      } catch (e) { toast(STT(ST.failimg)); }
     }
 
     function injectStyle() {
@@ -1694,7 +2021,7 @@ if (_0x34a005 && !_0x405c11) {
       if (!btn) {
         btn = document.createElement("button");
         btn.id = "mvStreakShare"; btn.type = "button";
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartilhar sequência</span>';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>' + STT(ST.btn) + '</span>';
         btn.onclick = shareStreak;
         // insere logo após o #streak (irmão — o app só mexe no innerHTML do #streak)
         if (streak.parentNode) streak.parentNode.insertBefore(btn, streak.nextSibling);
@@ -1706,8 +2033,121 @@ if (_0x34a005 && !_0x405c11) {
     boot();
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     [500, 1200, 2400, 4000].forEach(function (ms) { setTimeout(boot, ms); });
+    window.__mvOnLang(function () { var s = $("mvStreakShare"); if (s) { var sp = s.querySelector("span"); if (sp) sp.textContent = STT(ST.btn); } });
     window.__mvStreakShareCanvas = buildStreakCanvas;
     window.__mvShareStreak = shareStreak;
+  } catch (e) {}
+})();
+
+/* ==========================================================================
+   FIX #8 — Convite de notificação na PRIMEIRA TELA (stickiness).
+   Hoje o botão de notificação vive escondido no ⚙️ (por isso quase ninguém
+   ativa). Aqui mostramos um convite visível no topo que dispara o MESMO
+   mecanismo do app: clicamos programaticamente no #notifyToggle existente
+   (que pede permissão, faz subscribe e chama save_push_subscription).
+   Aparece só se: push suportado, ainda não ativado, e não dispensado há <7 dias.
+   ========================================================================== */
+(function () {
+  try {
+    var $ = function (id) { return document.getElementById(id); };
+    var DISMISS_KEY = "mv_notify_dismiss";
+    var SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
+    function pushSupported() {
+      return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+    }
+    function alreadyOn() {
+      var tg = $("notifyToggle");
+      if (tg && tg.classList.contains("on")) return true;
+      try { if (typeof Notification !== "undefined" && Notification.permission === "granted") return true; } catch (e) {}
+      return false;
+    }
+    function dismissedRecently() {
+      try {
+        var v = parseInt(localStorage.getItem(DISMISS_KEY) || "0", 10);
+        return v && (Date.now() - v) < SEVEN_DAYS;
+      } catch (e) { return false; }
+    }
+    function shouldShow() {
+      return pushSupported() && !!$("notifyToggle") && !alreadyOn() && !dismissedRecently();
+    }
+
+    function injectStyle() {
+      if ($("mvNotifyStyle")) return;
+      var s = document.createElement("style"); s.id = "mvNotifyStyle";
+      s.textContent = ""
+        + "#mvNotify{position:relative;margin:12px 0 0;padding:15px 16px;border-radius:16px;background:#fff;"
+        + "border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(20,10,50,.10);display:none;}"
+        + "#mvNotify.show{display:block;}"
+        + "#mvNotify .nt{display:flex;align-items:center;gap:9px;font-family:var(--brandfont,inherit);"
+        + "font-weight:800;font-size:15px;color:var(--ink,#1b1630);margin-bottom:4px;}"
+        + "#mvNotify .nt svg{width:20px;height:20px;flex:none;color:var(--c1,#6d28d9);}"
+        + "#mvNotify .ns{font-size:12.5px;line-height:1.5;color:var(--muted,#6f6b7e);margin-bottom:12px;}"
+        + "#mvNotify .nrow{display:flex;gap:8px;align-items:center;}"
+        + "#mvNotify .nyes{flex:1;border:none;border-radius:11px;padding:11px;font-weight:700;font-size:14px;color:#fff;"
+        + "background:linear-gradient(120deg,var(--c1,#6d28d9),var(--c2,#2563eb));cursor:pointer;font-family:inherit;}"
+        + "#mvNotify .nno{background:none;border:none;color:var(--muted,#6f6b7e);font-size:12.5px;cursor:pointer;"
+        + "font-family:inherit;padding:8px 6px;white-space:nowrap;}";
+      document.head.appendChild(s);
+    }
+
+    var NTXT = {
+      title: { pt: "Não perca a mensagem de amanhã", es: "No te pierdas la frase de mañana" },
+      sub: { pt: "Ative o lembrete e receba sua dose de motivação todo dia de manhã, direto no seu celular.", es: "Activa el recordatorio y recibe tu dosis de motivación cada mañana, directo en tu celular." },
+      yes: { pt: "Ativar lembrete diário", es: "Activar recordatorio diario" },
+      no: { pt: "agora não", es: "ahora no" }
+    };
+    function relocalize() {
+      var c = $("mvNotify"); if (!c) return;
+      var nt = c.querySelector(".nt"); if (nt) { var svg = nt.querySelector("svg"); nt.innerHTML = (svg ? svg.outerHTML : "") + window.__mvT(NTXT.title); }
+      var ns = c.querySelector(".ns"); if (ns) ns.textContent = window.__mvT(NTXT.sub);
+      var yes = $("mvNotifyYes"); if (yes) yes.textContent = window.__mvT(NTXT.yes);
+      var no = $("mvNotifyNo"); if (no) no.textContent = window.__mvT(NTXT.no);
+    }
+    window.__mvOnLang(relocalize);
+    function build() {
+      if ($("mvNotify")) return $("mvNotify");
+      var card = document.createElement("div");
+      card.id = "mvNotify";
+      card.innerHTML = ''
+        + '<div class="nt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' + window.__mvT(NTXT.title) + '</div>'
+        + '<div class="ns">' + window.__mvT(NTXT.sub) + '</div>'
+        + '<div class="nrow"><button class="nyes" id="mvNotifyYes">' + window.__mvT(NTXT.yes) + '</button>'
+        + '<button class="nno" id="mvNotifyNo">' + window.__mvT(NTXT.no) + '</button></div>';
+      // insere no topo, logo após a sequência (primeira tela)
+      var streak = $("streak");
+      if (streak && streak.parentNode) streak.parentNode.insertBefore(card, streak.nextSibling);
+      else (document.getElementById("app") || document.body).insertBefore(card, (document.getElementById("app") || document.body).firstChild);
+
+      $("mvNotifyYes").onclick = function () {
+        var tg = $("notifyToggle");
+        if (tg && !tg.classList.contains("on")) {
+          tg.click(); // dispara o fluxo real do app (permissão + subscribe + save_push_subscription)
+        }
+        // some assim que o app confirmar que ativou
+        var tries = 0;
+        var iv = setInterval(function () {
+          tries++;
+          if (alreadyOn()) { hide(); clearInterval(iv); }
+          else if (tries > 40) clearInterval(iv);
+        }, 250);
+      };
+      $("mvNotifyNo").onclick = function () {
+        try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (e) {}
+        hide();
+      };
+      return card;
+    }
+    function hide() { var c = $("mvNotify"); if (c) c.classList.remove("show"); }
+    function refresh() {
+      if (!shouldShow()) { hide(); return; }
+      injectStyle(); build().classList.add("show");
+    }
+
+    refresh();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", refresh);
+    [600, 1500, 3000, 5000].forEach(function (ms) { setTimeout(refresh, ms); });
+    window.__mvNotifyRefresh = refresh;
   } catch (e) {}
 })();
 
