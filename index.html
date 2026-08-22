@@ -367,6 +367,8 @@ const I18N = {
     loadMsg: "Preparando sua dose diária de motivação…",
     loadErr: "Não consegui conectar agora. Verifique sua internet e tente novamente.",
     retry: "Tentar novamente",
+    brandName: "Motiva Vendas",
+    titleTag: "Motiva Vendas — Mensagem do dia",
     defaultTag: "Sua dose diária de motivação",
     loadingMsg: "Carregando…",
     btnRandom: "Nova mensagem",
@@ -414,6 +416,8 @@ const I18N = {
     loadMsg: "Preparando tu dosis diaria de motivación…",
     loadErr: "No pude conectar ahora. Revisa tu internet e inténtalo de nuevo.",
     retry: "Intentar de nuevo",
+    brandName: "Motiva Ventas",
+    titleTag: "Motiva Ventas — Frase del día",
     defaultTag: "Tu dosis diaria de motivación",
     loadingMsg: "Cargando…",
     btnRandom: "Nueva frase",
@@ -459,6 +463,13 @@ const I18N = {
   }
 };
 function t(_k) { const _d = I18N[LANG] || I18N.pt; return _d[_k] != null ? _d[_k] : (I18N.pt[_k] != null ? I18N.pt[_k] : _k); }
+// Nome/slogan PADRÃO (versão livre) seguem o idioma; empresa contratada mantém o próprio.
+const DEFAULT_NAMES = ["Motiva Vendas", "Motiva Ventas"];
+const DEFAULT_TAGS = ["Sua dose diária de motivação", "Tu dosis diaria de motivación"];
+function isDefaultName(_n) { return !_n || DEFAULT_NAMES.indexOf((_n || "").trim()) !== -1; }
+function isDefaultTag(_t) { return !_t || DEFAULT_TAGS.indexOf((_t || "").trim()) !== -1; }
+function brandNameFor(_companyName) { return isDefaultName(_companyName) ? t("brandName") : _companyName; }
+function taglineFor(_tagline) { return isDefaultTag(_tagline) ? t("defaultTag") : _tagline; }
 const TOAST_ES = {
   "📋 Copiado!": "📋 ¡Copiado!",
   "Não foi possível copiar": "No se pudo copiar",
@@ -499,6 +510,7 @@ function applyStaticI18n() {
     if (hint && hintKey) hint.textContent = t(hintKey);
   };
   // loading screen
+  const lh1 = document.querySelector("#loadingScreen h1"); if (lh1 && isDefaultName(lh1.textContent)) lh1.textContent = t("brandName");
   S("loadMsg", t("loadMsg"));
   S("btnRetry", t("retry"));
   // mensagem inicial (placeholder de carregamento), antes do servidor responder
@@ -514,8 +526,8 @@ function applyStaticI18n() {
   // settings drawer
   const dh = document.querySelector("#drawer .dh h2"); if (dh) dh.textContent = t("settings");
   const compK = document.querySelector("#drawer .row .k"); if (compK) compK.textContent = t("company");
-  // re-localiza o sufixo "(livre)"/"(libre)" no valor da empresa
-  const ac = $("accCompany"); if (ac) { let s = (ac.textContent || ""); const wasFree = /\((livre|libre)\)\s*$/.test(s); s = s.replace(/\s*\((livre|libre)\)\s*$/, ""); ac.textContent = s + (wasFree ? t("free") : ""); }
+  // re-localiza nome padrão + sufixo "(livre)"/"(libre)" no valor da empresa
+  const ac = $("accCompany"); if (ac) { let s = (ac.textContent || ""); const wasFree = /\((livre|libre)\)\s*$/.test(s); s = s.replace(/\s*\((livre|libre)\)\s*$/, "").trim(); if (isDefaultName(s)) s = t("brandName"); ac.textContent = s + (wasFree ? t("free") : ""); }
   P("userName", t("yourNamePh"));
   P("licenseKey", t("licensePh"));
   setLabHint("field-name", "yourName", "yourNameHint");
@@ -530,8 +542,11 @@ function applyStaticI18n() {
   const fdh = document.querySelector("#favDrawer .dh h2"); if (fdh) fdh.textContent = t("favTitleDrawer");
   // notify state (only when currently off; the live check overwrites when on)
   const ns = $("notifyState"), nt = $("notifyToggle"); if (ns && nt && !nt.classList.contains("on")) ns.textContent = t("notifyOff");
-  // brandTag default (only while showing the built-in default — free version)
-  const bt = $("brandTag"); if (bt) { const cur = (bt.textContent || "").trim(); if (cur === I18N.pt.defaultTag || cur === I18N.es.defaultTag || cur === "") bt.textContent = t("defaultTag"); }
+  // Nome + slogan padrão seguem o idioma (empresa contratada mantém os próprios)
+  const bn = $("brandName"); if (bn && isDefaultName(bn.textContent)) bn.textContent = t("brandName");
+  const fbn = $("footBrand"); if (fbn && isDefaultName(fbn.textContent)) fbn.textContent = t("brandName");
+  const bt = $("brandTag"); if (bt) { const cur = (bt.textContent || "").trim(); if (isDefaultTag(cur)) bt.textContent = t("defaultTag"); }
+  try { document.title = t("titleTag"); } catch (e) {}
   // install button (keeps svg on non-iphone; iphone variant is text-only)
   const ib = $("installBtn");
   if (ib) { if (ib.querySelector("svg")) { setBtnText("installBtn", t("installBtn")); } else { ib.textContent = t("installIphone"); } }
@@ -668,10 +683,11 @@ async function _0x5e8e35() {
     _0x358ab2.setProperty("--accent", _0x1ce0c5.c3);
   }
   document.querySelector("meta[name=theme-color]").setAttribute("content", _0x534819(_0x1ce0c5.c1) ? _0x1ce0c5.c1 : "#6d28d9");
-  $("brandName").textContent = _0x1ce0c5.company_name || "Motiva Vendas";
-  $("footBrand").textContent = _0x1ce0c5.company_name || "Motiva Vendas";
-  $("brandTag").textContent = _0x1ce0c5.tagline || t("defaultTag");
-  $("accCompany").textContent = (_0x1ce0c5.company_name || "Motiva Vendas") + (_0x1ce0c5.is_public ? t("free") : "");
+  const _bn = brandNameFor(_0x1ce0c5.company_name || "Motiva Vendas");
+  $("brandName").textContent = _bn;
+  $("footBrand").textContent = _bn;
+  $("brandTag").textContent = taglineFor(_0x1ce0c5.tagline);
+  $("accCompany").textContent = _bn + (_0x1ce0c5.is_public ? t("free") : "");
   const _0x464912 = $("logoBox");
   const _0x458395 = "<svg viewBox=\"0 0 240 240\" width=\"30\" height=\"30\"><path d=\"M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z\" fill=\"#ffffff\"/><path d=\"M132 58 L96 120 H120 L112 172 L156 104 H130 Z\" fill=\"#f59e0b\"/></svg>";
   if (_0x1ce0c5.logo_url && /^(data:image\/|https:\/\/)/i.test(_0x1ce0c5.logo_url)) {
@@ -729,7 +745,8 @@ async function _0x2f40f7() {
     data: _0x351ccc,
     error: _0x214072
   } = await sb.rpc("get_daily_message", {
-    p_segment: _0x2a5694
+    p_segment: _0x2a5694,
+    p_lang: LANG
   });
   if (_0x214072) {
     _0x968ab4(_0x214072, true);
@@ -749,7 +766,8 @@ async function _0x2d3010() {
     data: _0x5cb5c2,
     error: _0x4ef091
   } = await sb.rpc("get_random_message", {
-    p_segment: _0x2a5694
+    p_segment: _0x2a5694,
+    p_lang: LANG
   });
   if (_0x4ef091) {
     _0x968ab4(_0x4ef091, false);
@@ -760,7 +778,8 @@ async function _0x2d3010() {
   let _0x3bc8a8 = 0;
   while (_0x57ab35.includes(_0x5e600f) && _0x3bc8a8 < 6) {
     const _0x9fd8e8 = await sb.rpc("get_random_message", {
-      p_segment: _0x2a5694
+      p_segment: _0x2a5694,
+      p_lang: LANG
     });
     if (_0x9fd8e8.error) {
       break;
@@ -815,7 +834,8 @@ async function _0xf9fdf9(_0xd4d2b9) {
     data: _0x3c8b23,
     error: _0x10a824
   } = await sb.rpc("get_elaborated_message", {
-    p_segment: _0x2a5694
+    p_segment: _0x2a5694,
+    p_lang: LANG
   });
   if (_0x10a824 || !_0x3c8b23 || !_0x3c8b23[0]) {
     _0x2d3010();
@@ -825,7 +845,8 @@ async function _0xf9fdf9(_0xd4d2b9) {
   let _0x50fca1 = 0;
   while (_0x23ab3a === _0x457ca4 && _0x50fca1 < 4) {
     const _0x36a5b4 = await sb.rpc("get_elaborated_message", {
-      p_segment: _0x2a5694
+      p_segment: _0x2a5694,
+      p_lang: LANG
     });
     if (_0x36a5b4.error || !_0x36a5b4.data || !_0x36a5b4.data[0]) {
       break;
@@ -1691,7 +1712,7 @@ applyStaticI18n();
       phName:{pt:"Como te chamam?",es:"¿Cómo te llaman?"},
       lWork:{pt:"Onde você trabalha?",es:"¿Dónde trabajas?"},
       phWork:{pt:"Nome da empresa",es:"Nombre de la empresa"},
-      consent:{pt:"Li e aceito a <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidade</a> e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.",es:"Leí y acepto la <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidad</a> y autorizo a Motiva Vendas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."},
+      consent:{pt:"Li e aceito a <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidade</a> e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.",es:"Leí y acepto la <a href=\"privacidade.html\" target=\"_blank\" rel=\"noopener\">Política de Privacidad</a> y autorizo a Motiva Ventas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."},
       submit:{pt:"Receber minha mensagem",es:"Recibir mi frase"},
       priv:{pt:"🔒 Seus dados ficam seguros. Você pode parar de receber quando quiser.",es:"🔒 Tus datos están seguros. Puedes dejar de recibir cuando quieras."},
       sending:{pt:"Enviando…",es:"Enviando…"},
@@ -1756,7 +1777,7 @@ applyStaticI18n();
       try{
         var seg="geral";
         try{ seg=(document.getElementById("segSelect")||{}).value || localStorage.getItem("mv_seg") || "geral"; }catch(e){}
-        var r=await sbL.rpc("get_elaborated_message",{ p_segment: seg });
+        var r=await sbL.rpc("get_elaborated_message",{ p_segment: seg, p_lang: window.__mvLang() });
         var msg=r && r.data && r.data[0] && r.data[0].message;
         if(msg){
           var el=$("message"); if(el){ el.classList.remove("small","tiny"); if(msg.length>250) el.classList.add("tiny"); else if(msg.length>140) el.classList.add("small"); el.textContent=msg; }
@@ -1770,7 +1791,7 @@ applyStaticI18n();
       try{
         try{ await window.__mvAuthClient(sbL); }catch(e){}
         var CONSENT_TXT = window.__mvLang()==="es"
-          ? "Leí y acepto la Política de Privacidad y autorizo a Motiva Vendas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."
+          ? "Leí y acepto la Política de Privacidad y autorizo a Motiva Ventas a usar mi WhatsApp para enviarme frases motivacionales y contactarme sobre productos, planes y novedades."
           : "Li e aceito a Política de Privacidade e autorizo o Motiva Vendas a usar meu WhatsApp para me enviar mensagens motivacionais e entrar em contato sobre produtos, planos e novidades.";
         var r=await sbL.rpc("save_lead",{ p_name:$("mvName").value, p_phone:$("mvPhone").value, p_workplace:$("mvWork").value, p_consent:true, p_consent_text:CONSENT_TXT, p_policy_version:"2026-08-21" });
         if(r.error) throw r.error;
@@ -1983,7 +2004,7 @@ applyStaticI18n();
         var cv = await buildStreakCanvas();
         var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
         var msg = window.__mvLang() === "es"
-          ? ("🔥 Llevo " + n + (n === 1 ? " día" : " días") + " seguidos motivándome para vender más en Motiva Vendas. ¿Te sumas? motivavendas.com.br")
+          ? ("🔥 Llevo " + n + (n === 1 ? " día" : " días") + " seguidos motivándome para vender más en Motiva Ventas. ¿Te sumas? motivavendas.com.br")
           : ("🔥 Estou há " + n + (n === 1 ? " dia" : " dias") + " seguidos me motivando pra vender mais no Motiva Vendas! Bora comigo? motivavendas.com.br");
         var blob = await new Promise(function (r) { cv.toBlob(r, "image/png", 0.95); });
         if (!blob) { toast(STT(ST.failimg)); return; }
