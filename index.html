@@ -1537,6 +1537,180 @@ if (_0x34a005 && !_0x405c11) {
   } catch (e) {}
 })();
 
+/* ==========================================================================
+   FIX #7 — Sequência que dá orgulho + compartilhar (crescimento viral).
+   Realça o #streak e adiciona um botão que gera uma imagem de conquista da
+   sequência (mv_streak) pra compartilhar no WhatsApp — cada vendedor vira
+   um convite com a marca + endereço do app. Só aparece a partir de 2 dias.
+   ========================================================================== */
+(function () {
+  try {
+    var $ = function (id) { return document.getElementById(id); };
+    var MIN_STREAK = 2;
+
+    function getStreak() {
+      try { return parseInt(localStorage.getItem("mv_streak") || "0", 10) || 0; } catch (e) { return 0; }
+    }
+    function toast(m) {
+      var t = $("toast"); if (!t) return;
+      t.textContent = m; t.classList.add("show");
+      clearTimeout(window.__mvT3); window.__mvT3 = setTimeout(function () { t.classList.remove("show"); }, 2800);
+    }
+    function loadImage(src) {
+      return new Promise(function (res, rej) {
+        var im = new Image();
+        if (!/^data:/i.test(src)) im.crossOrigin = "anonymous";
+        im.onload = function () { res(im); }; im.onerror = function () { rej(); };
+        im.src = src;
+      });
+    }
+    function roundRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    var DEFAULT_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><path d="M92 30 H180 a30 30 0 0 1 30 30 V150 a30 30 0 0 1 -30 30 H108 l-30 30 v-30 h-16 a30 30 0 0 1 -30 -30 V60 a30 30 0 0 1 30 -30 Z" fill="#ffffff"/><path d="M132 58 L96 120 H120 L112 172 L156 104 H130 Z" fill="#f59e0b"/></svg>';
+    function drawSvg(ctx, svg, x, y, w, h) {
+      return new Promise(function (res) {
+        var im = new Image();
+        im.onload = function () { try { ctx.drawImage(im, x, y, w, h); } catch (e) {} res(); };
+        im.onerror = function () { res(); };
+        im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+      });
+    }
+    function phraseFor(n) {
+      if (n >= 30) return "Um mês sem falhar. Isso é atitude de campeão.";
+      if (n >= 14) return "Duas semanas de constância. O resultado vem de quem não para.";
+      if (n >= 7) return "Uma semana seguida! Constância é o que separa quem vende de quem só tenta.";
+      if (n >= 5) return "Sequência quente! Mantém o ritmo e a venda vem atrás.";
+      return "Todo dia mais perto da minha meta.";
+    }
+
+    async function buildStreakCanvas() {
+      var n = getStreak();
+      var cs = getComputedStyle(document.documentElement);
+      var c1 = (cs.getPropertyValue("--c1") || "#6d28d9").trim();
+      var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
+      var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
+      var W = 1080, H = 1350;
+      var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      var ctx = cv.getContext("2d");
+      var g = ctx.createLinearGradient(0, 0, W * 0.45, H);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      var rg = ctx.createRadialGradient(W * 0.5, -160, 60, W * 0.5, -160, W);
+      rg.addColorStop(0, "rgba(255,255,255,0.18)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+      try { await document.fonts.ready; } catch (e) {}
+
+      // topo: logo + nome
+      var headerImg = document.querySelector("#logoBox img");
+      var drew = false;
+      if (headerImg && headerImg.getAttribute("src")) {
+        try {
+          var im = await loadImage(headerImg.src);
+          ctx.save(); roundRectPath(ctx, 84, 84, 84, 84, 18); ctx.clip();
+          ctx.drawImage(im, 84, 84, 84, 84); ctx.restore(); drew = true;
+        } catch (e) { drew = false; }
+      }
+      if (!drew) { await drawSvg(ctx, DEFAULT_LOGO_SVG, 84, 84, 84, 84); }
+      ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.fillStyle = "#fff";
+      ctx.font = "700 40px Poppins, sans-serif";
+      ctx.fillText(name, 186, 126);
+
+      // centro: chama + número gigante
+      ctx.textAlign = "center";
+      ctx.font = "120px Poppins, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+      ctx.fillText("🔥", W / 2, 400);
+      ctx.fillStyle = "#fff";
+      ctx.font = "800 320px Poppins, sans-serif";
+      ctx.fillText(String(n), W / 2, 640);
+      ctx.font = "700 62px Poppins, sans-serif";
+      ctx.fillText(n === 1 ? "DIA SEGUIDO" : "DIAS SEGUIDOS", W / 2, 800);
+      ctx.font = "500 34px Poppins, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.fillText("de motivação e foco em vendas", W / 2, 858);
+
+      // frase
+      ctx.fillStyle = "#f59e0b";
+      ctx.fillRect(W / 2 - 48, 918, 96, 6);
+      ctx.fillStyle = "#fff"; ctx.font = "600 40px Poppins, sans-serif";
+      var phrase = phraseFor(n), words = phrase.split(" "), line = "", y = 1000, maxW = W - 200;
+      for (var i = 0; i < words.length; i++) {
+        var t = line ? line + " " + words[i] : words[i];
+        if (ctx.measureText(t).width > maxW && line) { ctx.fillText(line, W / 2, y); y += 52; line = words[i]; }
+        else line = t;
+      }
+      if (line) ctx.fillText(line, W / 2, y);
+
+      // rodapé: chamada + site
+      ctx.font = "600 30px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.fillText("Comece a sua sequência — é grátis", W / 2, H - 150);
+      ctx.font = "700 40px Poppins, sans-serif"; ctx.fillStyle = "#fff";
+      ctx.fillText("motivavendas.com.br", W / 2, H - 96);
+      return cv;
+    }
+
+    async function shareStreak() {
+      var n = getStreak();
+      toast("🔥 Gerando sua sequência…");
+      try {
+        var cv = await buildStreakCanvas();
+        var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
+        var msg = "🔥 Estou há " + n + (n === 1 ? " dia" : " dias") + " seguidos me motivando pra vender mais no Motiva Vendas! Bora comigo? motivavendas.com.br";
+        var blob = await new Promise(function (r) { cv.toBlob(r, "image/png", 0.95); });
+        if (!blob) { toast("Não foi possível gerar a imagem"); return; }
+        var file = new File([blob], "minha-sequencia.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], text: msg, title: name }); } catch (e) {}
+        } else {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a"); a.href = url; a.download = "minha-sequencia.png";
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+          toast("🔥 Imagem salva! Compartilhe com seu time.");
+        }
+      } catch (e) { toast("Não foi possível gerar a imagem"); }
+    }
+
+    function injectStyle() {
+      if ($("mvStreakStyle")) return;
+      var s = document.createElement("style"); s.id = "mvStreakStyle";
+      s.textContent = ""
+        + "#streak{background:rgba(255,255,255,.14);padding:8px 13px;border-radius:999px;font-size:13px!important;}"
+        + "#mvStreakShare{display:none;align-items:center;gap:7px;margin:10px 0 0;align-self:flex-start;"
+        + "background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.35);"
+        + "border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;"
+        + "font-family:inherit;transition:background .15s;}"
+        + "#mvStreakShare:hover{background:rgba(255,255,255,.26);}"
+        + "#mvStreakShare svg{width:15px;height:15px;}";
+      document.head.appendChild(s);
+    }
+
+    function ensureButton() {
+      var streak = $("streak");
+      if (!streak) return;
+      var btn = $("mvStreakShare");
+      if (!btn) {
+        btn = document.createElement("button");
+        btn.id = "mvStreakShare"; btn.type = "button";
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartilhar sequência</span>';
+        btn.onclick = shareStreak;
+        // insere logo após o #streak (irmão — o app só mexe no innerHTML do #streak)
+        if (streak.parentNode) streak.parentNode.insertBefore(btn, streak.nextSibling);
+      }
+      btn.style.display = getStreak() >= MIN_STREAK ? "inline-flex" : "none";
+    }
+
+    function boot() { injectStyle(); ensureButton(); }
+    boot();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+    [500, 1200, 2400, 4000].forEach(function (ms) { setTimeout(boot, ms); });
+    window.__mvStreakShareCanvas = buildStreakCanvas;
+    window.__mvShareStreak = shareStreak;
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
