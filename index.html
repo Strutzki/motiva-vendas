@@ -1451,9 +1451,9 @@ applyStaticI18n();
     ctx.closePath();
   }
 
-  async function buildShareCanvas() {
+  async function buildShareCanvas(_ovr) {
     var msgEl = $("message");
-    var text = msgEl ? (msgEl.textContent || "").trim() : "";
+    var text = (typeof _ovr === "string" && _ovr.trim()) ? _ovr.trim() : (msgEl ? (msgEl.textContent || "").trim() : "");
     if (!text) return null;
     var cs = getComputedStyle(document.documentElement);
     var c1 = (cs.getPropertyValue("--c1") || "#6d28d9").trim();
@@ -2169,6 +2169,92 @@ applyStaticI18n();
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", refresh);
     [600, 1500, 3000, 5000].forEach(function (ms) { setTimeout(refresh, ms); });
     window.__mvNotifyRefresh = refresh;
+  } catch (e) {}
+})();
+
+/* ==========================================================================
+   FIX #9 — Compartilhar IMAGEM também nos Favoritos.
+   Injeta um botão "📷 Imagem" em cada card do drawer de favoritos, gerando o
+   mesmo card 1080×1350 da marca (reaproveita __mvBuildShareCanvas do FIX #2)
+   e compartilhando via Web Share API (fallback download). Aditivo — não toca
+   no app base (ofuscado). ================================================== */
+(function () {
+  "use strict";
+  try {
+    var $ = function (id) { return document.getElementById(id); };
+    function toast(m) {
+      var t = $("toast"); if (!t) return;
+      t.textContent = m; t.classList.add("show");
+      clearTimeout(window.__mvToastT9);
+      window.__mvToastT9 = setTimeout(function () { t.classList.remove("show"); }, 2600);
+    }
+    function injectStyle() {
+      if ($("mvFavImgStyle")) return;
+      var st = document.createElement("style"); st.id = "mvFavImgStyle";
+      st.textContent =
+        ".fbtn.mvimg{background:color-mix(in srgb,var(--c3,#f59e0b) 16%,#fff);color:#b45309;" +
+        "box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c3,#f59e0b) 34%,#fff);}";
+      (document.head || document.documentElement).appendChild(st);
+    }
+    async function shareFavImage(text, btn) {
+      if (!text || !window.__mvBuildShareCanvas) { toast("Não foi possível gerar a imagem"); return; }
+      if (btn) btn.disabled = true;
+      toast("🖼️ Gerando imagem…");
+      try {
+        var cv = await window.__mvBuildShareCanvas(text);
+        if (!cv) { toast("Não foi possível gerar a imagem"); return; }
+        var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
+        var blob = await new Promise(function (r) { cv.toBlob(r, "image/png", 0.95); });
+        if (!blob) { toast("Não foi possível gerar a imagem"); return; }
+        var fname = (name.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-+|-+$/g, "") || "motiva") + ".png";
+        var file = new File([blob], fname, { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: name }); } catch (e) {}
+        } else {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a"); a.href = url; a.download = fname;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+          toast("🖼️ Imagem salva!");
+        }
+      } catch (e) { toast("Não foi possível gerar a imagem"); }
+      finally { if (btn) btn.disabled = false; }
+    }
+    function inject() {
+      var body = $("favBody"); if (!body) return;
+      var items = body.querySelectorAll(".favitem");
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var bar = it.querySelector(".fbar"); if (!bar) continue;
+        if (bar.querySelector(".fbtn.mvimg")) continue;
+        var p = it.querySelector("p"); var text = p ? (p.textContent || "").trim() : "";
+        if (!text) continue;
+        injectStyle();
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "fbtn mvimg";
+        btn.textContent = "📷 Imagem";
+        (function (t, b) { b.addEventListener("click", function () { shareFavImage(t, b); }); })(text, btn);
+        var cp = bar.querySelector(".fbtn.cp");
+        if (cp && cp.nextSibling) bar.insertBefore(btn, cp.nextSibling);
+        else if (cp) bar.appendChild(btn);
+        else bar.insertBefore(btn, bar.firstChild);
+      }
+    }
+    var mo = new MutationObserver(function () { inject(); });
+    function start() {
+      var body = $("favBody");
+      if (body) { try { mo.observe(body, { childList: true, subtree: true }); } catch (e) {} inject(); }
+      var opener = $("openFavs");
+      if (opener && !opener.__mvImgHooked) {
+        opener.__mvImgHooked = true;
+        opener.addEventListener("click", function () { setTimeout(inject, 60); setTimeout(inject, 260); });
+      }
+    }
+    start();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+    [600, 1500, 3000].forEach(function (ms) { setTimeout(start, ms); });
+    window.__mvFavImgInject = inject;
   } catch (e) {}
 })();
 
