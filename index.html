@@ -2257,6 +2257,123 @@ applyStaticI18n();
     window.__mvFavImgInject = inject;
   } catch (e) {}
 })();
+/* ==========================================================================
+   FIX #10 — Limite de "Nova mensagem" (3/dia) SÓ na versão livre + upsell.
+   Empresa contratada (is_public=false) = ilimitado pro time. Aditivo. O modelo
+   é: grátis pro vendedor, premium é o que a EMPRESA desbloqueia. Ao estourar o
+   limite na versão livre, mostra um cartão na LÍNGUA DO VENDEDOR: "quero que me
+   expliquem" (vira lead) e "mostrar pro meu gestor" (compartilha) — não empurra
+   pra página de compra corporativa.
+   ========================================================================== */
+(function () {
+  "use strict";
+  try {
+    var LIMIT = 3;
+    var mvIsPublic = null; // null = ainda não sei -> fail-open (não bloqueia)
+    var $ = function (id) { return document.getElementById(id); };
+    function lang() { try { return (window.__mvLang && window.__mvLang()) || (localStorage.getItem("mv_lang") || "pt"); } catch (e) { return "pt"; } }
+    function todayStr() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+    function getCount() { try { return parseInt(localStorage.getItem("mv_reroll_" + todayStr()) || "0", 10) || 0; } catch (e) { return 0; } }
+    function setCount(n) { try { localStorage.setItem("mv_reroll_" + todayStr(), String(n)); } catch (e) {} }
+
+    var TX = {
+      pt: { title: "Você já pegou suas 3 doses de hoje 💪",
+            sub: "Volte amanhã pra sua próxima dose grátis. E se você curte, o Motiva pode virar oficial no seu time — com a cara da empresa, mais mensagens e áudio. Bora levar a ideia adiante?",
+            ctaLead: "💬 Quero que me expliquem", ctaShare: "📲 Mostrar pro meu gestor", close: "ou volte amanhã 🌙" },
+      es: { title: "Ya tomaste tus 3 dosis de hoy 💪",
+            sub: "Vuelve mañana para tu próxima dosis gratis. Y si te gusta, Motiva puede volverse oficial en tu equipo — con la cara de la empresa, más mensajes y audio. ¿Llevamos la idea adelante?",
+            ctaLead: "💬 Quiero que me expliquen", ctaShare: "📲 Mostrar a mi jefe", close: "o vuelve mañana 🌙" },
+    };
+
+    function injectStyle() {
+      if ($("mvLimitStyle")) return;
+      var st = document.createElement("style"); st.id = "mvLimitStyle";
+      st.textContent =
+        "#mvLimitOv{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;" +
+        "background:rgba(24,12,48,.62);backdrop-filter:blur(4px);opacity:0;transition:opacity .22s}" +
+        "#mvLimitOv.show{opacity:1}" +
+        "#mvLimitCard{max-width:400px;width:100%;background:#fff;border-radius:24px;padding:30px 26px 22px;text-align:center;" +
+        "box-shadow:0 24px 60px rgba(24,12,48,.34);transform:translateY(14px) scale(.98);transition:transform .22s}" +
+        "#mvLimitOv.show #mvLimitCard{transform:none}" +
+        "#mvLimitCard .mvlemoji{font-size:46px;line-height:1;margin-bottom:12px}" +
+        "#mvLimitCard h3{font-family:var(--font,'Poppins',sans-serif);font-size:22px;font-weight:800;color:#2a1a4a;margin:0 0 10px;line-height:1.22}" +
+        "#mvLimitCard p{font-family:var(--font,'Poppins',sans-serif);font-size:15px;line-height:1.5;color:#5b5470;margin:0 0 20px}" +
+        "#mvLimitCard .mvlcta{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-family:var(--font,'Poppins',sans-serif);" +
+        "font-size:16px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--c1,#6d28d9),var(--c2,#2563eb));" +
+        "box-shadow:0 10px 24px rgba(109,40,217,.34)}" +
+        "#mvLimitCard .mvlcta2{display:block;width:100%;margin-top:10px;border-radius:14px;padding:14px;font-family:var(--font,'Poppins',sans-serif);" +
+        "font-size:15px;font-weight:700;cursor:pointer;color:var(--c1,#6d28d9);" +
+        "background:color-mix(in srgb,var(--c1,#6d28d9) 8%,#fff);border:1.5px solid color-mix(in srgb,var(--c1,#6d28d9) 26%,#fff)}" +
+        "#mvLimitCard .mvlclose{display:block;width:100%;margin-top:12px;background:none;border:none;color:#8a83a0;font-size:14px;" +
+        "font-family:var(--font,'Poppins',sans-serif);font-weight:600;cursor:pointer;padding:6px}";
+      (document.head || document.documentElement).appendChild(st);
+    }
+    function closeCard() { var ov = $("mvLimitOv"); if (ov) { ov.classList.remove("show"); setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 240); } }
+    function shareToManager() {
+      var es = lang() === "es";
+      var msg = es
+        ? "Encontré una app de dosis diaria de motivación para equipos de ventas — se puede dejar con la cara de nuestra empresa (logo, colores, nombre). Míralo: "
+        : "Achei um app de dose diária de motivação pra time de vendas — dá pra deixar com a cara da nossa empresa (logo, cores, nome). Dá uma olhada: ";
+      var url = "https://motivavendas.com.br/contratar.html";
+      try {
+        if (navigator.share) { navigator.share({ title: "Motiva Vendas", text: msg, url: url }).catch(function () {}); }
+        else { window.open("https://wa.me/?text=" + encodeURIComponent(msg + url), "_blank"); }
+      } catch (e) { window.open("https://wa.me/?text=" + encodeURIComponent(msg + url), "_blank"); }
+    }
+    function showCard() {
+      if ($("mvLimitOv")) { $("mvLimitOv").classList.add("show"); return; }
+      injectStyle();
+      var t = TX[lang() === "es" ? "es" : "pt"];
+      var ov = document.createElement("div"); ov.id = "mvLimitOv";
+      var card = document.createElement("div"); card.id = "mvLimitCard";
+      card.innerHTML = '<div class="mvlemoji">🚀</div><h3></h3><p></p>' +
+        '<button class="mvlcta" type="button"></button>' +
+        '<button class="mvlcta2" type="button"></button>' +
+        '<button class="mvlclose" type="button"></button>';
+      card.querySelector("h3").textContent = t.title;
+      card.querySelector("p").textContent = t.sub;
+      var cta = card.querySelector(".mvlcta"); cta.textContent = t.ctaLead;
+      cta.addEventListener("click", function () {
+        closeCard();
+        if (typeof window.__mvOpenLead === "function") { try { window.__mvOpenLead(); return; } catch (e) {} }
+        try { window.open("contratar.html", "_blank"); } catch (e) { location.href = "contratar.html"; }
+      });
+      var cta2 = card.querySelector(".mvlcta2"); cta2.textContent = t.ctaShare;
+      cta2.addEventListener("click", function () { shareToManager(); closeCard(); });
+      var cl = card.querySelector(".mvlclose"); cl.textContent = t.close;
+      cl.addEventListener("click", closeCard);
+      ov.addEventListener("click", function (e) { if (e.target === ov) closeCard(); });
+      ov.appendChild(card);
+      document.body.appendChild(ov);
+      requestAnimationFrame(function () { ov.classList.add("show"); });
+    }
+
+    // intercepta o clique em "Nova mensagem" na fase de captura (antes do handler base)
+    document.addEventListener("click", function (e) {
+      var t = e.target && e.target.closest ? e.target.closest("#btnRandom") : null;
+      if (!t) return;
+      if (mvIsPublic !== true) return;               // só bloqueia na versão livre confirmada
+      var n = getCount();
+      if (n >= LIMIT) { e.preventDefault(); e.stopImmediatePropagation(); showCard(); return; }
+      setCount(n + 1);
+    }, true);
+
+    // descobre se é versão livre (mesmo padrão dos FIX #4/#5)
+    function detectPublic() {
+      try {
+        if (!window.supabase || !window.supabase.createClient || !window.__mvAuthClient) return;
+        var sbP = window.supabase.createClient("https://kikfdoifausfladcjcec.supabase.co", "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb", { auth: { persistSession: false, autoRefreshToken: false } });
+        window.__mvAuthClient(sbP).then(function () { return sbP.rpc("get_branding"); }).then(function (r) {
+          var row = r && r.data && r.data[0];
+          mvIsPublic = !(row && row.is_public === false);   // sem empresa/licença = público
+        }).catch(function () {});
+      } catch (e) {}
+    }
+    detectPublic();
+    [800, 2000, 4000].forEach(function (ms) { setTimeout(function () { if (mvIsPublic === null) detectPublic(); }, ms); });
+    window.__mvRerollInfo = function () { return { isPublic: mvIsPublic, count: getCount(), limit: LIMIT }; };
+  } catch (e) {}
+})();
 
 </script>
 </body>
