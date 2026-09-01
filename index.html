@@ -2551,6 +2551,11 @@ applyStaticI18n();
         ".mvt-chip:active{transform:scale(.99)}" +
         ".mvt-chip .em{font-size:22px}.mvt-chip b{display:block;font-size:15px;font-weight:800;color:var(--ink,#2a1a4a)}.mvt-chip span{font-size:12px;color:var(--muted,#6b6480)}" +
         ".mvt-chip .tag{margin-left:auto;font-size:10px;font-weight:800;color:var(--c1,#6d28d9);background:color-mix(in srgb,var(--c1,#6d28d9) 10%,#fff);border-radius:999px;padding:3px 8px}" +
+        ".mvt-brand{display:flex;align-items:center;gap:11px;padding-bottom:13px;margin-bottom:13px;border-bottom:1px solid var(--line,#ece9f6)}" +
+        ".mvt-brand .lg{width:44px;height:44px;border-radius:12px;flex:0 0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;background:linear-gradient(135deg,var(--c1,#6d28d9),var(--c2,#2563eb))}" +
+        ".mvt-brand .lg img{width:100%;height:100%;object-fit:cover}" +
+        ".mvt-brand .bt b{display:block;font-size:15px;font-weight:800;color:var(--ink,#2a1a4a);line-height:1.15}" +
+        ".mvt-brand .bt span{font-size:11.5px;color:var(--muted,#6b6480)}" +
         ".mvt-thead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}" +
         ".mvt-thead .k{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--c3,#f59e0b)}" +
         ".mvt-thead .tec{font-size:10.5px;font-weight:700;color:var(--muted,#6b6480);background:var(--soft,#faf9fe);border:1px solid var(--line,#ece9f6);border-radius:999px;padding:4px 10px;max-width:55%;text-align:right}" +
@@ -2601,7 +2606,8 @@ applyStaticI18n();
         '<button class="mvt-chip" data-p="b2c"><span class="em">🛍️</span><span><b id="mvtB2Ct"></b><span id="mvtB2Cs"></span></span><span class="tag">B2C</span></button>' +
         '<button class="mvt-chip" data-p="c2c"><span class="em">🤝</span><span><b id="mvtC2Ct"></b><span id="mvtC2Cs"></span></span><span class="tag">C2C</span></button></div>' +
         '<div class="mvt-step" id="mvt-loading"><div class="mvt-load" id="mvtLoad"></div></div>' +
-        '<div class="mvt-step" id="mvt-tip"><div class="mvt-thead"><span class="k" id="mvtToday"></span><span class="tec" id="mvtTec"></span></div>' +
+        '<div class="mvt-step" id="mvt-tip"><div class="mvt-brand" id="mvtBrand"><div class="lg" id="mvtBrandLg">⚡</div><div class="bt"><b id="mvtBrandNm"></b><span id="mvtBrandTg"></span></div></div>' +
+        '<div class="mvt-thead"><span class="k" id="mvtToday"></span><span class="tec" id="mvtTec"></span></div>' +
         '<div class="mvt-title" id="mvtTitle"></div><div class="mvt-body" id="mvtBody"></div><div class="mvt-why" id="mvtWhy"></div>' +
         '<div class="mvt-acts"><button id="mvtSave"></button><button id="mvtShare"></button></div>' +
         '<div class="mvt-inv" id="mvtInv"><h4 id="mvtInvH"></h4><p id="mvtInvP"></p><div class="row"><button class="mvt-grad" id="mvtInvYes"></button><button class="mvt-ghost" id="mvtInvNo"></button></div></div>' +
@@ -2645,6 +2651,20 @@ applyStaticI18n();
     }
     function renderTip(tip) {
       var t = T();
+      // cabeçalho da marca: empresa vinculada (logo/nome/frase) ou Motiva Vendas
+      try {
+        var nm = (document.getElementById("brandName") && document.getElementById("brandName").textContent || "Motiva Vendas").trim();
+        var tg = (document.getElementById("brandTag") && document.getElementById("brandTag").textContent || "").trim();
+        if ($("mvtBrandNm")) $("mvtBrandNm").textContent = nm;
+        if ($("mvtBrandTg")) { $("mvtBrandTg").textContent = tg; $("mvtBrandTg").style.display = tg ? "" : "none"; }
+        var lb = document.getElementById("logoBox");
+        var img = lb ? lb.querySelector("img") : null;
+        var box = $("mvtBrandLg");
+        if (box) {
+          if (img && img.getAttribute("src")) { box.innerHTML = '<img alt="" src="' + img.getAttribute("src") + '">'; }
+          else { box.textContent = "⚡"; }
+        }
+      } catch (e) {}
       $("mvtTec").textContent = tip.technique || "";
       $("mvtTitle").textContent = tip.title || "";
       $("mvtBody").textContent = tip.body || "";
