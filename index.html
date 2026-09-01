@@ -2556,7 +2556,15 @@ applyStaticI18n();
       var c = await auth(); if (!c) return null;
       try { var r = await c.rpc("get_daily_tip", { p_profile: state.profile, p_segment: seg(), p_lang: lang() }); if (r.error) throw r.error; return (r.data && r.data[0]) || null; } catch (e) { return null; }
     }
-    async function setProfile(p) { state.profile = p; var c = await auth(); if (c) { try { await c.rpc("set_sales_profile", { p_profile: p }); } catch (e) {} } }
+    async function setProfile(p) { state.profile = p; var c = await auth(); if (c) { try { await c.rpc("set_sales_profile", { p_profile: p }); } catch (e) {} } await refreshTip(); }
+    // re-sorteia a dica do dia (trocou perfil ou segmento) e atualiza a UI na hora
+    async function refreshTip() {
+      try { var c = await auth(); if (c) await c.rpc("reset_today_tip"); } catch (e) {}
+      state.tip = null; paintEntry();
+      var ov = $("mvTipOv");
+      if (ov && ov.classList.contains("show") && $("mvt-tip") && $("mvt-tip").classList.contains("on")) { try { await showTip(); } catch (e) {} }
+    }
+    window.__mvTipRefresh = refreshTip;
 
     /* ---------- estilos ---------- */
     function injectStyle() {
@@ -2778,6 +2786,36 @@ applyStaticI18n();
     if (typeof window.__mvOnLang === "function") window.__mvOnLang(function () { paintEntry(); relocSheet(); relocSettings(); });
     document.addEventListener("mv:langchange", function () { paintEntry(); relocSheet(); relocSettings(); });
     window.__mvTipOpen = openTip;
+  } catch (e) {}
+})();
+
+/* ==========================================================================
+   FIX #12 — troca de SEGMENTO re-sorteia na hora (mensagem do dia + dica).
+   ========================================================================== */
+(function () {
+  try {
+    var SB_URL = "https://kikfdoifausfladcjcec.supabase.co";
+    var SB_KEY = "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+    function cli() { if (!window.supabase || !window.supabase.createClient) return null; return window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } }); }
+    var busy = false;
+    async function onSegChange() {
+      if (window.__mvSegSyn) return;
+      if (busy) return; busy = true;
+      try {
+        var c = cli();
+        if (c) {
+          try { await window.__mvAuthClient(c); } catch (e) {}
+          try { await c.rpc("reset_today_message"); } catch (e) {}
+        }
+        var sel = document.getElementById("segSelect");
+        if (sel) { window.__mvSegSyn = true; try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {} window.__mvSegSyn = false; }
+        if (typeof window.__mvTipRefresh === "function") { try { await window.__mvTipRefresh(); } catch (e) {} }
+      } finally { busy = false; }
+    }
+    function bind() { var sel = document.getElementById("segSelect"); if (sel && !sel.__mvSegBound) { sel.__mvSegBound = true; sel.addEventListener("change", onSegChange); } }
+    bind();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+    [500, 1200, 2500, 4500].forEach(function (ms) { setTimeout(bind, ms); });
   } catch (e) {}
 })();
 
