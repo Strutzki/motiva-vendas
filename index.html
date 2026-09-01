@@ -1556,82 +1556,115 @@ applyStaticI18n();
     var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
     var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
     var slogan = (($("brandTag") && $("brandTag").textContent) || "").trim();
-    var W = 1080, H = 1350;
-    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var W = 1080;
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = 1350;
     var ctx = cv.getContext("2d");
-    var g = ctx.createLinearGradient(0, 0, W * 0.45, H);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    var rg = ctx.createRadialGradient(W * 0.5, -140, 60, W * 0.5, -140, W);
-    rg.addColorStop(0, "rgba(255,255,255,0.16)"); rg.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    // tema (mesmas cores da tela da dica)
+    var ink = (cs.getPropertyValue("--ink") || "#2a1a4a").trim();
+    var muted = (cs.getPropertyValue("--muted") || "#6b6480").trim();
+    var soft = (cs.getPropertyValue("--soft") || "#faf9fe").trim();
+    var line = (cs.getPropertyValue("--line") || "#ece9f6").trim();
+    var amber = (cs.getPropertyValue("--c3") || "#f59e0b").trim();
     try { await document.fonts.ready; } catch (e) {}
+    var BH = 250, L = 72, maxW = W - 144, labelY = BH + 48;
+
+    // ===== FASE 1: medir (define fontes/linhas e altura final) =====
+    // chip da técnica
+    var techTxt = String(tip.technique || "").trim(), cf = 26, chW = 0, maxChip = 480;
+    if (techTxt) {
+      ctx.font = "700 " + cf + "px Poppins, sans-serif";
+      while (ctx.measureText(techTxt).width + 44 > maxChip && cf > 19) { cf -= 1; ctx.font = "700 " + cf + "px Poppins, sans-serif"; }
+      chW = Math.min(ctx.measureText(techTxt).width + 44, maxChip);
+    }
+    var titleTxt = String(tip.title || ""), bodyTxt = String(tip.body || ""), whyTxt = String(tip.why || "").trim();
+    var titleTop = labelY + 70, pad = 24, gap1 = 24, gap2 = 30, MAXC = 1300;
+    var tFont = titleTxt.length > 72 ? 46 : (titleTxt.length > 48 ? 52 : 58);
+    var bFont = 37, wFont = 28;
+    function tLines() { ctx.font = "800 " + tFont + "px Poppins, sans-serif"; return wrapLines(ctx, titleTxt, maxW); }
+    function bLines() { ctx.font = "500 " + bFont + "px Poppins, sans-serif"; return wrapLines(ctx, bodyTxt, maxW); }
+    function wLines() { ctx.font = "500 " + wFont + "px Poppins, sans-serif"; return wrapLines(ctx, "💡 Por que funciona: " + whyTxt, maxW - 2 * pad - 8); }
+    var tl, bl, wl, guard = 0;
+    function measure() {
+      tl = tLines(); bl = bLines(); wl = whyTxt ? wLines() : [];
+      var tH = tl.length * tFont * 1.2, bH = bl.length * bFont * 1.5;
+      var wH = whyTxt ? (wl.length * wFont * 1.45 + 2 * pad) : 0;
+      return titleTop + tH + gap1 + bH + (whyTxt ? gap2 + wH : 0);
+    }
+    var contentBottom = measure();
+    while (contentBottom > MAXC && guard++ < 90) {
+      if (bFont > 28) bFont -= 1;
+      else if (tFont > 40) tFont -= 2;
+      else if (wFont > 22) wFont -= 1;
+      else break;
+      contentBottom = measure();
+    }
+    // altura final encosta no conteúdo (como o modal), com folga p/ rodapé
+    var H = Math.max(760, Math.min(1450, Math.round(contentBottom + 104)));
+    var footerY = H - 54;
+    cv.height = H; // redimensiona e limpa o contexto
+
+    // ===== FASE 2: desenhar =====
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);
+    // faixa da marca (gradiente da empresa/app)
+    var g = ctx.createLinearGradient(0, 0, W, BH);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, BH);
+    ctx.save(); ctx.beginPath(); ctx.arc(W - 56, 18, 150, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fill(); ctx.restore();
+    // logo (empresa se houver, senão ⚡)
+    var lx = 72, ls = 104, ly = (BH - ls) / 2;
+    ctx.save(); roundRectPath(ctx, lx, ly, ls, ls, 22); ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.fill(); ctx.restore();
     var headerImg = document.querySelector("#logoBox img"); var drew = false;
     if (headerImg && headerImg.getAttribute("src")) {
       try {
         var im = await loadImage(headerImg.src);
-        ctx.save(); roundRectPath(ctx, 84, 84, 92, 92, 20); ctx.clip();
-        var ar = im.width / im.height, tr = 1, sw, sh, sx, sy;
-        if (ar > tr) { sh = im.height; sw = sh * tr; sx = (im.width - sw) / 2; sy = 0; }
-        else { sw = im.width; sh = sw / tr; sx = 0; sy = (im.height - sh) / 2; }
-        ctx.drawImage(im, sx, sy, sw, sh, 84, 84, 92, 92); ctx.restore(); drew = true;
+        ctx.save(); roundRectPath(ctx, lx, ly, ls, ls, 22); ctx.clip();
+        var ar = im.width / im.height, sw, sh, sx, sy;
+        if (ar > 1) { sh = im.height; sw = sh; sx = (im.width - sw) / 2; sy = 0; }
+        else { sw = im.width; sh = sw; sx = 0; sy = (im.height - sh) / 2; }
+        ctx.drawImage(im, sx, sy, sw, sh, lx, ly, ls, ls); ctx.restore(); drew = true;
       } catch (e) { drew = false; }
     }
-    if (!drew) { await drawSvg(ctx, DEFAULT_LOGO_SVG, 84, 84, 92, 92); }
+    if (!drew) { ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "58px Poppins, sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("⚡", lx + ls / 2, ly + ls / 2 + 4); ctx.restore(); }
+    // nome + slogan (branco)
+    var tx = lx + ls + 26;
     ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.fillStyle = "#fff";
-    ctx.font = "700 42px Poppins, sans-serif";
-    ctx.fillText(name, 192, slogan ? 118 : 130);
-    if (slogan) { ctx.font = "500 24px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.82)"; ctx.fillText(slogan, 192, 156); }
-
-    var L = 88, maxW = W - 176;
-    ctx.textBaseline = "top";
-    ctx.textAlign = "left"; ctx.fillStyle = "#fbbf24"; ctx.font = "800 30px Poppins, sans-serif";
-    ctx.fillText("💡 DICA DE VENDA", L, 232);
-    ctx.fillStyle = "#f59e0b"; ctx.fillRect(L, 282, 74, 6);
-
-    // chip da técnica de venda usada (ex.: "SPIN — Implicação")
-    var yStart = 330;
-    var techTxt = String(tip.technique || "").trim();
+    ctx.font = "800 48px Poppins, sans-serif";
+    ctx.fillText(name, tx, slogan ? BH / 2 - 18 : BH / 2);
+    if (slogan) { ctx.font = "500 27px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.86)"; ctx.fillText(slogan, tx, BH / 2 + 22); }
+    // etiqueta + chip
+    ctx.textBaseline = "top"; ctx.textAlign = "left";
+    ctx.fillStyle = amber; ctx.font = "800 30px Poppins, sans-serif";
+    ctx.fillText("🎯 DICA DE HOJE", L, labelY);
     if (techTxt) {
-      ctx.font = "700 27px Poppins, sans-serif";
-      var chW = ctx.measureText(techTxt).width, chPadX = 26, chH = 54, chY = 306;
-      var chFull = chW + chPadX * 2; if (chFull > maxW) chFull = maxW;
-      ctx.save();
-      roundRectPath(ctx, L, chY, chFull, chH, chH / 2);
-      ctx.fillStyle = "rgba(255,255,255,0.16)"; ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = "rgba(251,191,36,0.9)"; ctx.stroke();
-      ctx.clip();
-      ctx.textBaseline = "middle"; ctx.fillStyle = "#fde68a";
-      ctx.fillText(techTxt, L + chPadX, chY + chH / 2 + 1);
-      ctx.restore();
-      ctx.textBaseline = "top";
-      yStart = chY + chH + 30;
+      var chH = 50, chX = W - 72 - chW, chY = labelY - 12;
+      ctx.save(); roundRectPath(ctx, chX, chY, chW, chH, chH / 2);
+      ctx.fillStyle = soft; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = line; ctx.stroke(); ctx.clip();
+      ctx.fillStyle = muted; ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.font = "700 " + cf + "px Poppins, sans-serif";
+      ctx.fillText(techTxt, chX + 22, chY + chH / 2 + 1);
+      ctx.restore(); ctx.textBaseline = "top"; ctx.textAlign = "left";
     }
-
-    var titleTxt = String(tip.title || ""), bodyTxt = String(tip.body || "");
-    var tFont = titleTxt.length > 56 ? 58 : (titleTxt.length > 38 ? 64 : 72);
-    var bFont = 42;
-    function tLines() { ctx.font = "800 " + tFont + "px Poppins, sans-serif"; return wrapLines(ctx, titleTxt, maxW); }
-    function bLines() { ctx.font = "500 " + bFont + "px Poppins, sans-serif"; return wrapLines(ctx, bodyTxt, maxW); }
-    var tl = tLines(), bl = bLines();
-    var footerTop = H - 150, avail = footerTop - yStart, gap = 26;
-    function total() { return tl.length * (tFont * 1.18) + gap + bl.length * (bFont * 1.42); }
-    var guard = 0;
-    while (total() > avail && guard++ < 60) {
-      if (bFont > 28) { bFont -= 2; bl = bLines(); }
-      else if (tFont > 46) { tFont -= 4; tl = tLines(); }
-      else break;
-    }
-    var y = yStart;
-    ctx.fillStyle = "#fff"; ctx.font = "800 " + tFont + "px Poppins, sans-serif";
-    var tlh = tFont * 1.18;
+    // título
+    var y = titleTop, tlh = tFont * 1.2;
+    ctx.fillStyle = ink; ctx.font = "800 " + tFont + "px Poppins, sans-serif";
     for (var i = 0; i < tl.length; i++) { ctx.fillText(tl[i], L, y); y += tlh; }
-    y += gap;
-    ctx.font = "500 " + bFont + "px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.94)";
-    var blh = bFont * 1.42;
+    y += gap1;
+    // corpo
+    var blh = bFont * 1.5;
+    ctx.fillStyle = "#453d5c"; ctx.font = "500 " + bFont + "px Poppins, sans-serif";
     for (var j = 0; j < bl.length; j++) { ctx.fillText(bl[j], L, y); y += blh; }
-    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.font = "600 28px Poppins, sans-serif"; ctx.fillStyle = "rgba(255,255,255,.9)";
-    ctx.fillText("motivavendas.com.br", W / 2, H - 78);
+    // caixa "por que funciona"
+    if (whyTxt) {
+      y += gap2;
+      var wlh = wFont * 1.45, boxH = wl.length * wlh + 2 * pad;
+      ctx.save(); roundRectPath(ctx, L, y, maxW, boxH, 16); ctx.fillStyle = soft; ctx.fill(); ctx.restore();
+      ctx.fillStyle = amber; ctx.fillRect(L, y, 6, boxH);
+      var wy = y + pad;
+      ctx.fillStyle = "#5b5470"; ctx.font = "500 " + wFont + "px Poppins, sans-serif";
+      for (var k = 0; k < wl.length; k++) { ctx.fillText(wl[k], L + pad + 8, wy); wy += wlh; }
+    }
+    // rodapé
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.font = "600 26px Poppins, sans-serif"; ctx.fillStyle = muted;
+    ctx.fillText("motivavendas.com.br", W / 2, footerY);
     return cv;
   }
 
