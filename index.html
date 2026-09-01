@@ -2375,6 +2375,250 @@ applyStaticI18n();
   } catch (e) {}
 })();
 
+
+/* ==========================================================================
+   FIX #11 — "Dica de venda do dia" (técnica de venda por perfil × segmento).
+   Aditivo. Não toca no core (mensagem motivacional segue grátis e sem barreira).
+   Fluxo (CX aprovado): toca → 1 pergunta de perfil (1x) → dica INTEIRA e grátis
+   → convite de cadastro único (só na versão livre e se ainda não é lead).
+   Backend: RPCs get_tip_state / set_sales_profile / get_daily_tip. Perfil salvo
+   no profile; segmento reaproveitado de localStorage.mv_seg. Empresa contratante
+   (is_public=false) = sem convite. ====================================================================== */
+(function () {
+  "use strict";
+  try {
+    var $ = function (id) { return document.getElementById(id); };
+    var SB_URL = "https://kikfdoifausfladcjcec.supabase.co";
+    var SB_KEY = "sb_publishable_4rvixE7jkFM62gaCGudyyg_HStzXpbb";
+    var sbT = null;
+    function client() {
+      if (sbT) return sbT;
+      if (!window.supabase || !window.supabase.createClient) return null;
+      sbT = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+      return sbT;
+    }
+    function lang() { try { return (window.__mvLang && window.__mvLang()) || localStorage.getItem("mv_lang") || "pt"; } catch (e) { return "pt"; } }
+    function es() { return lang() === "es"; }
+    function seg() { try { return localStorage.getItem("mv_seg") || "geral"; } catch (e) { return "geral"; } }
+    function toast(m) { var t = $("toast"); if (!t) return; t.textContent = m; t.classList.add("show"); clearTimeout(window.__mvToastT11); window.__mvToastT11 = setTimeout(function () { t.classList.remove("show"); }, 2600); }
+
+    var TX = {
+      pt: {
+        title: "Dica de venda do dia", subNew: "Técnica prática pra usar hoje.", subGot: "Sua dica de hoje · toque pra ver",
+        qh: "Rapidinho: como você vende?", qp: "Pra acertar a dica certa pro seu dia. Você muda quando quiser nas Configurações.",
+        b2b: ["Vendo para empresas", "frota, software, atacado, insumos"], b2c: ["Vendo pro consumidor", "loja, concessionária, plano, clínica"], c2c: ["Vendo direto pra pessoa física", "usados, brechó, revenda"],
+        today: "🎯 DICA DE HOJE", why: "Por que funciona:", save: "Salvar", share: "Compartilhar", saved: "Salva! ⭐",
+        invH: "Toda manhã tem uma nova 💪", invP: "Feita pro seu tipo de venda, sem repetir. Quer receber?", invYes: "Quero receber", invNo: "agora não",
+        loading: "Preparando sua dica…", fail: "Não consegui carregar a dica agora.", setLabel: "Como você vende", setHint: "Ajusta as dicas de venda pro seu tipo de cliente.", shareSuffix: "— via Motiva Vendas · motivavendas.com.br"
+      },
+      es: {
+        title: "Consejo de venta del día", subNew: "Técnica práctica para usar hoy.", subGot: "Tu consejo de hoy · toca para ver",
+        qh: "Rápido: ¿cómo vendes?", qp: "Para acertar el consejo de tu día. Lo cambias cuando quieras en Ajustes.",
+        b2b: ["Vendo a empresas", "flota, software, mayoreo, insumos"], b2c: ["Vendo al consumidor", "tienda, agencia, plan, clínica"], c2c: ["Vendo directo a personas", "usados, reventa, catálogo"],
+        today: "🎯 CONSEJO DE HOY", why: "Por qué funciona:", save: "Guardar", share: "Compartir", saved: "¡Guardado! ⭐",
+        invH: "Cada mañana hay uno nuevo 💪", invP: "Hecho para tu tipo de venta, sin repetir. ¿Quieres recibir?", invYes: "Quiero recibir", invNo: "ahora no",
+        loading: "Preparando tu consejo…", fail: "No pude cargar el consejo ahora.", setLabel: "¿Cómo vendes?", setHint: "Ajusta los consejos para tu tipo de cliente.", shareSuffix: "— vía Motiva Ventas · motivavendas.com.br"
+      }
+    };
+    function T() { return TX[es() ? "es" : "pt"]; }
+
+    var state = { profile: null, is_lead: false, is_public: true, loaded: false, tip: null };
+
+    async function auth() { var c = client(); if (!c) return null; try { await window.__mvAuthClient(c); } catch (e) {} return c; }
+    async function loadState() {
+      var c = await auth(); if (!c) return;
+      try { var r = await c.rpc("get_tip_state"); var row = r && r.data && r.data[0]; if (row) { state.profile = row.sales_profile || null; state.is_lead = !!row.is_lead; } } catch (e) {}
+      try { var b = await c.rpc("get_branding"); var br = b && b.data && b.data[0]; if (br) state.is_public = !(br.is_public === false); } catch (e) {}
+      state.loaded = true; paintEntry(); paintSettings();
+    }
+    async function fetchTip() {
+      var c = await auth(); if (!c) return null;
+      try { var r = await c.rpc("get_daily_tip", { p_profile: state.profile, p_segment: seg(), p_lang: lang() }); if (r.error) throw r.error; return (r.data && r.data[0]) || null; } catch (e) { return null; }
+    }
+    async function setProfile(p) { state.profile = p; var c = await auth(); if (c) { try { await c.rpc("set_sales_profile", { p_profile: p }); } catch (e) {} } }
+
+    /* ---------- estilos ---------- */
+    function injectStyle() {
+      if ($("mvTipStyle")) return;
+      var st = document.createElement("style"); st.id = "mvTipStyle";
+      st.textContent =
+        ".mvtip-card{position:relative;background:#fff;border:1.5px solid var(--line,#ece9f6);border-radius:18px;padding:14px;margin:14px 0 4px;display:flex;align-items:center;gap:13px;cursor:pointer;box-shadow:0 6px 16px rgba(40,20,80,.06)}" +
+        ".mvtip-card:active{transform:scale(.99)}" +
+        ".mvtip-ic{width:48px;height:48px;border-radius:14px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:24px;background:color-mix(in srgb,var(--c3,#f59e0b) 16%,#fff)}" +
+        ".mvtip-tx b{display:block;font-weight:800;font-size:15.5px;color:var(--ink,#2a1a4a)}" +
+        ".mvtip-tx span{font-size:12.5px;color:var(--muted,#6b6480)}" +
+        ".mvtip-chev{margin-left:auto;color:#c3bcd8;font-size:22px;font-weight:800}" +
+        ".mvtip-badge{position:absolute;top:-9px;left:14px;background:var(--c3,#f59e0b);color:#3a2600;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;letter-spacing:.4px}" +
+        ".mvtip-dot{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--c3,#f59e0b);animation:mvtpulse 1.6s infinite}" +
+        "@keyframes mvtpulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.55)}70%{box-shadow:0 0 0 11px rgba(245,158,11,0)}100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}}" +
+        "#mvTipOv{position:fixed;inset:0;z-index:9998;display:none;align-items:flex-end;justify-content:center;background:rgba(24,12,48,.55);backdrop-filter:blur(3px)}" +
+        "#mvTipOv.show{display:flex}" +
+        "#mvTipSheet{background:#fff;width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-height:92%;overflow-y:auto;transform:translateY(18px);animation:mvtup .26s cubic-bezier(.2,.8,.2,1) forwards;font-family:var(--font,'Poppins',sans-serif)}" +
+        "@keyframes mvtup{to{transform:none}}" +
+        "#mvTipSheet .grip{width:40px;height:4px;background:#e4e0ef;border-radius:3px;margin:2px auto 14px}" +
+        ".mvt-step{display:none}.mvt-step.on{display:block}" +
+        ".mvt-q h3{font-size:19px;font-weight:800;color:var(--ink,#2a1a4a)}" +
+        ".mvt-q p{font-size:13px;color:var(--muted,#6b6480);margin:6px 0 14px}" +
+        ".mvt-chip{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--soft,#faf9fe);border:1.5px solid var(--line,#ece9f6);border-radius:15px;padding:14px;margin-bottom:9px;cursor:pointer}" +
+        ".mvt-chip:active{transform:scale(.99)}" +
+        ".mvt-chip .em{font-size:22px}.mvt-chip b{display:block;font-size:15px;font-weight:800;color:var(--ink,#2a1a4a)}.mvt-chip span{font-size:12px;color:var(--muted,#6b6480)}" +
+        ".mvt-chip .tag{margin-left:auto;font-size:10px;font-weight:800;color:var(--c1,#6d28d9);background:color-mix(in srgb,var(--c1,#6d28d9) 10%,#fff);border-radius:999px;padding:3px 8px}" +
+        ".mvt-thead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}" +
+        ".mvt-thead .k{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--c3,#f59e0b)}" +
+        ".mvt-thead .tec{font-size:10.5px;font-weight:700;color:var(--muted,#6b6480);background:var(--soft,#faf9fe);border:1px solid var(--line,#ece9f6);border-radius:999px;padding:4px 10px;max-width:55%;text-align:right}" +
+        ".mvt-title{font-size:21px;font-weight:800;line-height:1.2;letter-spacing:-.3px;color:var(--ink,#2a1a4a);margin-bottom:11px}" +
+        ".mvt-body{font-size:14.5px;line-height:1.55;color:#453d5c}" +
+        ".mvt-why{background:var(--soft,#faf9fe);border:1px solid var(--line,#ece9f6);border-left:4px solid var(--c3,#f59e0b);border-radius:12px;padding:11px 13px;margin:15px 0;font-size:13px;line-height:1.5;color:#5b5470}" +
+        ".mvt-why b{color:var(--ink,#2a1a4a)}" +
+        ".mvt-acts{display:flex;gap:9px}.mvt-acts button{flex:1;border:none;border-radius:12px;padding:12px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit;background:color-mix(in srgb,var(--c1,#6d28d9) 8%,#fff);color:var(--c1,#6d28d9);border:1.5px solid color-mix(in srgb,var(--c1,#6d28d9) 22%,#fff)}" +
+        ".mvt-inv{margin-top:16px;border-top:1px dashed var(--line,#ece9f6);padding-top:14px}" +
+        ".mvt-inv h4{font-size:15.5px;font-weight:800;color:var(--ink,#2a1a4a);margin-bottom:4px}" +
+        ".mvt-inv p{font-size:12.5px;color:var(--muted,#6b6480);margin-bottom:11px}" +
+        ".mvt-inv .row{display:flex;gap:9px}.mvt-inv .row button{flex:1;border:none;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}" +
+        ".mvt-grad{background:linear-gradient(135deg,var(--c1,#6d28d9),var(--c2,#2563eb));color:#fff}.mvt-ghost{background:none;color:var(--muted,#6b6480)}" +
+        ".mvt-load{text-align:center;padding:26px 6px;color:var(--muted,#6b6480);font-size:14px}" +
+        "#mvSetProfile{display:flex;gap:7px;margin-top:4px}#mvSetProfile button{flex:1;border:1.5px solid var(--line,#ece9f6);background:var(--soft,#faf9fe);border-radius:11px;padding:9px 4px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--ink,#2a1a4a)}" +
+        "#mvSetProfile button.on{border-color:var(--c1,#6d28d9);background:color-mix(in srgb,var(--c1,#6d28d9) 10%,#fff);color:var(--c1,#6d28d9)}";
+      (document.head || document.documentElement).appendChild(st);
+    }
+
+    /* ---------- entrada (card na tela) ---------- */
+    function ensureEntry() {
+      if ($("mvTipCard")) return;
+      var msg = $("message"); if (!msg) return;
+      var card = msg.closest ? msg.closest(".card") : null; if (!card || !card.parentNode) return;
+      injectStyle();
+      var el = document.createElement("div"); el.id = "mvTipCard"; el.className = "mvtip-card";
+      el.innerHTML = '<span class="mvtip-badge" id="mvTipBadge">NOVO</span><span class="mvtip-dot" id="mvTipDot"></span>' +
+        '<div class="mvtip-ic">🎯</div><div class="mvtip-tx"><b id="mvTipTitle"></b><span id="mvTipSub"></span></div><div class="mvtip-chev">›</div>';
+      el.addEventListener("click", openTip);
+      card.parentNode.insertBefore(el, card.nextSibling);
+      paintEntry();
+    }
+    function paintEntry() {
+      var t = T();
+      if ($("mvTipTitle")) $("mvTipTitle").textContent = t.title;
+      if ($("mvTipSub")) $("mvTipSub").textContent = state.profile ? t.subGot : t.subNew;
+    }
+
+    /* ---------- overlay ---------- */
+    function ensureSheet() {
+      if ($("mvTipOv")) return;
+      injectStyle();
+      var ov = document.createElement("div"); ov.id = "mvTipOv";
+      ov.innerHTML =
+        '<div id="mvTipSheet"><div class="grip"></div>' +
+        '<div class="mvt-step" id="mvt-profile"><div class="mvt-q"><h3 id="mvtQH"></h3><p id="mvtQP"></p></div>' +
+        '<button class="mvt-chip" data-p="b2b"><span class="em">🏢</span><span><b id="mvtB2Bt"></b><span id="mvtB2Bs"></span></span><span class="tag">B2B</span></button>' +
+        '<button class="mvt-chip" data-p="b2c"><span class="em">🛍️</span><span><b id="mvtB2Ct"></b><span id="mvtB2Cs"></span></span><span class="tag">B2C</span></button>' +
+        '<button class="mvt-chip" data-p="c2c"><span class="em">🤝</span><span><b id="mvtC2Ct"></b><span id="mvtC2Cs"></span></span><span class="tag">C2C</span></button></div>' +
+        '<div class="mvt-step" id="mvt-loading"><div class="mvt-load" id="mvtLoad"></div></div>' +
+        '<div class="mvt-step" id="mvt-tip"><div class="mvt-thead"><span class="k" id="mvtToday"></span><span class="tec" id="mvtTec"></span></div>' +
+        '<div class="mvt-title" id="mvtTitle"></div><div class="mvt-body" id="mvtBody"></div><div class="mvt-why" id="mvtWhy"></div>' +
+        '<div class="mvt-acts"><button id="mvtSave"></button><button id="mvtShare"></button></div>' +
+        '<div class="mvt-inv" id="mvtInv"><h4 id="mvtInvH"></h4><p id="mvtInvP"></p><div class="row"><button class="mvt-grad" id="mvtInvYes"></button><button class="mvt-ghost" id="mvtInvNo"></button></div></div>' +
+        '</div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener("click", function (e) { if (e.target === ov) closeOv(); });
+      var chips = ov.querySelectorAll(".mvt-chip");
+      for (var i = 0; i < chips.length; i++) (function (b) { b.addEventListener("click", function () { pickProfile(b.getAttribute("data-p")); }); })(chips[i]);
+      $("mvtSave").addEventListener("click", saveTip);
+      $("mvtShare").addEventListener("click", shareTip);
+      $("mvtInvYes").addEventListener("click", function () { closeOv(); if (typeof window.__mvOpenLead === "function") { try { window.__mvOpenLead(); return; } catch (e) {} } });
+      $("mvtInvNo").addEventListener("click", closeOv);
+      relocSheet();
+    }
+    function relocSheet() {
+      var t = T(); if (!$("mvt-profile")) return;
+      $("mvtQH").textContent = t.qh; $("mvtQP").textContent = t.qp;
+      $("mvtB2Bt").textContent = t.b2b[0]; $("mvtB2Bs").textContent = t.b2b[1];
+      $("mvtB2Ct").textContent = t.b2c[0]; $("mvtB2Cs").textContent = t.b2c[1];
+      $("mvtC2Ct").textContent = t.c2c[0]; $("mvtC2Cs").textContent = t.c2c[1];
+      $("mvtLoad").textContent = t.loading; $("mvtToday").textContent = t.today;
+      $("mvtSave").textContent = t.save; $("mvtShare").textContent = t.share;
+      $("mvtInvH").textContent = t.invH; $("mvtInvP").textContent = t.invP; $("mvtInvYes").textContent = t.invYes; $("mvtInvNo").textContent = t.invNo;
+    }
+    function go(id) { var s = document.querySelectorAll(".mvt-step"); for (var i = 0; i < s.length; i++) s[i].classList.remove("on"); var e = $(id); if (e) e.classList.add("on"); }
+    function openOv() { ensureSheet(); relocSheet(); $("mvTipOv").classList.add("show"); }
+    function closeOv() { var o = $("mvTipOv"); if (o) o.classList.remove("show"); }
+
+    async function openTip() {
+      openOv();
+      if (!state.loaded) { go("mvt-loading"); await loadState(); }
+      if (!state.profile) { go("mvt-profile"); return; }
+      await showTip();
+    }
+    async function pickProfile(p) { await setProfile(p); paintEntry(); paintSettings(); await showTip(); }
+    async function showTip() {
+      go("mvt-loading");
+      var tip = await fetchTip();
+      if (!tip) { toast(T().fail); closeOv(); return; }
+      state.tip = tip; renderTip(tip); go("mvt-tip");
+    }
+    function renderTip(tip) {
+      var t = T();
+      $("mvtTec").textContent = tip.technique || "";
+      $("mvtTitle").textContent = tip.title || "";
+      $("mvtBody").textContent = tip.body || "";
+      $("mvtWhy").innerHTML = "💡 <b>" + t.why + "</b> " + (tip.why || "");
+      $("mvtInv").style.display = (state.is_public && !state.is_lead) ? "block" : "none";
+    }
+    function saveTip() {
+      try {
+        var arr = JSON.parse(localStorage.getItem("mv_tips_saved") || "[]");
+        if (state.tip && arr.indexOf(state.tip.title) === -1) { arr.unshift(state.tip.title); localStorage.setItem("mv_tips_saved", JSON.stringify(arr.slice(0, 60))); }
+      } catch (e) {}
+      toast(T().saved);
+    }
+    function shareTip() {
+      if (!state.tip) return;
+      var txt = state.tip.title + "\n\n" + state.tip.body + "\n\n" + T().shareSuffix;
+      try {
+        if (navigator.share) { navigator.share({ text: txt }).catch(function () {}); }
+        else { window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank"); }
+      } catch (e) { window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank"); }
+    }
+
+    /* ---------- seletor de perfil nas Configurações ---------- */
+    function paintSettings() {
+      var box = $("mvSetProfile"); if (!box) return;
+      var bs = box.querySelectorAll("button");
+      for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i].getAttribute("data-p") === state.profile);
+    }
+    function ensureSettings() {
+      if ($("mvSetField")) return;
+      var fseg = $("field-seg"); if (!fseg || !fseg.parentNode) return;
+      injectStyle();
+      var t = T();
+      var f = document.createElement("div"); f.className = "field"; f.id = "mvSetField";
+      f.innerHTML = '<label id="mvSetLabel"></label><div id="mvSetProfile">' +
+        '<button data-p="b2b">B2B</button><button data-p="b2c">B2C</button><button data-p="c2c">C2C</button></div>' +
+        '<div class="hint" id="mvSetHint"></div>';
+      fseg.parentNode.insertBefore(f, fseg.nextSibling);
+      $("mvSetLabel").textContent = t.setLabel; $("mvSetHint").textContent = t.setHint;
+      var bs = f.querySelectorAll("#mvSetProfile button");
+      for (var i = 0; i < bs.length; i++) (function (b) {
+        b.addEventListener("click", async function () { await setProfile(b.getAttribute("data-p")); paintSettings(); paintEntry(); toast(T().setLabel + " ✓"); });
+      })(bs[i]);
+      paintSettings();
+    }
+    function relocSettings() { var t = T(); if ($("mvSetLabel")) $("mvSetLabel").textContent = t.setLabel; if ($("mvSetHint")) $("mvSetHint").textContent = t.setHint; }
+
+    /* ---------- boot ---------- */
+    function boot() { ensureEntry(); ensureSettings(); }
+    boot();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+    [500, 1200, 2500, 4500].forEach(function (ms) { setTimeout(boot, ms); });
+    // carrega estado quando a sessão anônima estiver pronta
+    setTimeout(function () { loadState(); }, 1500);
+    setTimeout(function () { if (!state.loaded) loadState(); }, 4000);
+    // relocalizar em troca de idioma
+    if (typeof window.__mvOnLang === "function") window.__mvOnLang(function () { paintEntry(); relocSheet(); relocSettings(); });
+    document.addEventListener("mv:langchange", function () { paintEntry(); relocSheet(); relocSettings(); });
+    window.__mvTipOpen = openTip;
+  } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
