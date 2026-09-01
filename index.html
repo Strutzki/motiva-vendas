@@ -1589,13 +1589,32 @@ applyStaticI18n();
     ctx.fillText("💡 DICA DE VENDA", L, 232);
     ctx.fillStyle = "#f59e0b"; ctx.fillRect(L, 282, 74, 6);
 
+    // chip da técnica de venda usada (ex.: "SPIN — Implicação")
+    var yStart = 330;
+    var techTxt = String(tip.technique || "").trim();
+    if (techTxt) {
+      ctx.font = "700 27px Poppins, sans-serif";
+      var chW = ctx.measureText(techTxt).width, chPadX = 26, chH = 54, chY = 306;
+      var chFull = chW + chPadX * 2; if (chFull > maxW) chFull = maxW;
+      ctx.save();
+      roundRectPath(ctx, L, chY, chFull, chH, chH / 2);
+      ctx.fillStyle = "rgba(255,255,255,0.16)"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "rgba(251,191,36,0.9)"; ctx.stroke();
+      ctx.clip();
+      ctx.textBaseline = "middle"; ctx.fillStyle = "#fde68a";
+      ctx.fillText(techTxt, L + chPadX, chY + chH / 2 + 1);
+      ctx.restore();
+      ctx.textBaseline = "top";
+      yStart = chY + chH + 30;
+    }
+
     var titleTxt = String(tip.title || ""), bodyTxt = String(tip.body || "");
     var tFont = titleTxt.length > 56 ? 58 : (titleTxt.length > 38 ? 64 : 72);
     var bFont = 42;
     function tLines() { ctx.font = "800 " + tFont + "px Poppins, sans-serif"; return wrapLines(ctx, titleTxt, maxW); }
     function bLines() { ctx.font = "500 " + bFont + "px Poppins, sans-serif"; return wrapLines(ctx, bodyTxt, maxW); }
     var tl = tLines(), bl = bLines();
-    var yStart = 330, footerTop = H - 150, avail = footerTop - yStart, gap = 26;
+    var footerTop = H - 150, avail = footerTop - yStart, gap = 26;
     function total() { return tl.length * (tFont * 1.18) + gap + bl.length * (bFont * 1.42); }
     var guard = 0;
     while (total() > avail && guard++ < 60) {
