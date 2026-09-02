@@ -1551,6 +1551,9 @@ applyStaticI18n();
   // ---- card da DICA DE VENDA (título + corpo) reaproveitando logo/marca ----
   async function buildTipCanvas(tip) {
     if (!tip || !tip.title) return null;
+    var _es = (function () { try { return (((window.__mvLang && window.__mvLang()) || localStorage.getItem("mv_lang") || "pt") === "es"); } catch (e) { return false; } })();
+    var LBL_TODAY = _es ? "🎯 CONSEJO DE HOY" : "🎯 DICA DE HOJE";
+    var WHY_PREFIX = _es ? "💡 Por qué funciona: " : "💡 Por que funciona: ";
     var cs = getComputedStyle(document.documentElement);
     var c1 = (cs.getPropertyValue("--c1") || "#6d28d9").trim();
     var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
@@ -1582,7 +1585,7 @@ applyStaticI18n();
     var bFont = 37, wFont = 28;
     function tLines() { ctx.font = "800 " + tFont + "px Poppins, sans-serif"; return wrapLines(ctx, titleTxt, maxW); }
     function bLines() { ctx.font = "500 " + bFont + "px Poppins, sans-serif"; return wrapLines(ctx, bodyTxt, maxW); }
-    function wLines() { ctx.font = "500 " + wFont + "px Poppins, sans-serif"; return wrapLines(ctx, "💡 Por que funciona: " + whyTxt, maxW - 2 * pad - 8); }
+    function wLines() { ctx.font = "500 " + wFont + "px Poppins, sans-serif"; return wrapLines(ctx, WHY_PREFIX + whyTxt, maxW - 2 * pad - 8); }
     var tl, bl, wl, guard = 0;
     function measure() {
       tl = tLines(); bl = bLines(); wl = whyTxt ? wLines() : [];
@@ -1634,7 +1637,7 @@ applyStaticI18n();
     // etiqueta + chip
     ctx.textBaseline = "top"; ctx.textAlign = "left";
     ctx.fillStyle = amber; ctx.font = "800 30px Poppins, sans-serif";
-    ctx.fillText("🎯 DICA DE HOJE", L, labelY);
+    ctx.fillText(LBL_TODAY, L, labelY);
     if (techTxt) {
       var chH = 50, chX = W - 72 - chW, chY = labelY - 12;
       ctx.save(); roundRectPath(ctx, chX, chY, chW, chH, chH / 2);
