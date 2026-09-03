@@ -2801,6 +2801,23 @@ applyStaticI18n();
     if (typeof window.__mvOnLang === "function") window.__mvOnLang(function () { paintEntry(); relocSheet(); relocSettings(); });
     document.addEventListener("mv:langchange", function () { paintEntry(); relocSheet(); relocSettings(); });
     window.__mvTipOpen = openTip;
+
+    // Se o app voltar ao primeiro plano num NOVO dia (fuso SP, igual ao servidor),
+    // re-sincroniza a dica — evita ver a de ontem quando o PWA/aba fica aberto.
+    function curDaySP() { try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }); } catch (e) { try { return new Date().toISOString().slice(0, 10); } catch (_) { return ""; } } }
+    var _tipDay; try { _tipDay = localStorage.getItem("mv_tip_day"); } catch (e) { _tipDay = null; }
+    if (!_tipDay) { _tipDay = curDaySP(); try { localStorage.setItem("mv_tip_day", _tipDay); } catch (e) {} }
+    function onTipResume() {
+      var d = curDaySP();
+      if (!d || d === _tipDay) return;
+      _tipDay = d; try { localStorage.setItem("mv_tip_day", d); } catch (e) {}
+      state.tip = null; paintEntry();
+      var ov = $("mvTipOv");
+      if (ov && ov.classList.contains("show") && $("mvt-tip") && $("mvt-tip").classList.contains("on")) { try { showTip(); } catch (e) {} }
+    }
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) onTipResume(); });
+    window.addEventListener("pageshow", onTipResume);
+    window.addEventListener("focus", onTipResume);
   } catch (e) {}
 })();
 
