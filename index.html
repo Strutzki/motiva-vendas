@@ -1451,6 +1451,16 @@ applyStaticI18n();
     ctx.closePath();
   }
 
+  // localiza nome/frase do PRÓPRIO app pro espanhol (não toca em marca de empresa)
+  function mvAppLoc(name, slogan) {
+    var es; try { es = (((window.__mvLang && window.__mvLang()) || localStorage.getItem("mv_lang") || "pt") === "es"); } catch (e) { es = false; }
+    if (es) {
+      if (name === "Motiva Vendas") name = "Motiva Ventas";
+      if (slogan === "Sua dose diária de motivação") slogan = "Tu dosis diaria de motivación";
+    }
+    return [name, slogan];
+  }
+
   async function buildShareCanvas(_ovr) {
     var msgEl = $("message");
     var text = (typeof _ovr === "string" && _ovr.trim()) ? _ovr.trim() : (msgEl ? (msgEl.textContent || "").trim() : "");
@@ -1460,6 +1470,7 @@ applyStaticI18n();
     var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
     var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
     var slogan = (($("brandTag") && $("brandTag").textContent) || "").trim(); // já vem vazio p/ empresas contratadas
+    (function () { var b = mvAppLoc(name, slogan); name = b[0]; slogan = b[1]; })();
     var W = 1080, H = 1350;
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
     var ctx = cv.getContext("2d");
@@ -1559,6 +1570,7 @@ applyStaticI18n();
     var c2 = (cs.getPropertyValue("--c2") || "#2563eb").trim();
     var name = (($("brandName") && $("brandName").textContent) || "Motiva Vendas").trim();
     var slogan = (($("brandTag") && $("brandTag").textContent) || "").trim();
+    (function () { var b = mvAppLoc(name, slogan); name = b[0]; slogan = b[1]; })();
     var W = 1080;
     var cv = document.createElement("canvas"); cv.width = W; cv.height = 1350;
     var ctx = cv.getContext("2d");
