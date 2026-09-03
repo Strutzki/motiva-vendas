@@ -2803,17 +2803,24 @@ applyStaticI18n();
     window.__mvTipOpen = openTip;
 
     // Se o app voltar ao primeiro plano num NOVO dia (fuso SP, igual ao servidor),
-    // re-sincroniza a dica — evita ver a de ontem quando o PWA/aba fica aberto.
+    // recarrega o app — assim a MENSAGEM do dia e a DICA são rebuscadas do servidor.
+    // (Evita ver a de ontem quando o PWA/aba fica aberto virando o dia.)
     function curDaySP() { try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }); } catch (e) { try { return new Date().toISOString().slice(0, 10); } catch (_) { return ""; } } }
     var _tipDay; try { _tipDay = localStorage.getItem("mv_tip_day"); } catch (e) { _tipDay = null; }
     if (!_tipDay) { _tipDay = curDaySP(); try { localStorage.setItem("mv_tip_day", _tipDay); } catch (e) {} }
+    var _reloading = false;
     function onTipResume() {
+      if (_reloading) return;
       var d = curDaySP();
       if (!d || d === _tipDay) return;
       _tipDay = d; try { localStorage.setItem("mv_tip_day", d); } catch (e) {}
-      state.tip = null; paintEntry();
-      var ov = $("mvTipOv");
-      if (ov && ov.classList.contains("show") && $("mvt-tip") && $("mvt-tip").classList.contains("on")) { try { showTip(); } catch (e) {} }
+      _reloading = true;
+      try { location.reload(); } catch (e) {
+        state.tip = null; paintEntry();
+        var ov = $("mvTipOv");
+        if (ov && ov.classList.contains("show") && $("mvt-tip") && $("mvt-tip").classList.contains("on")) { try { showTip(); } catch (e2) {} }
+        _reloading = false;
+      }
     }
     document.addEventListener("visibilitychange", function () { if (!document.hidden) onTipResume(); });
     window.addEventListener("pageshow", onTipResume);
