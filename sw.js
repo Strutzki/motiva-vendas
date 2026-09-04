@@ -1,5 +1,5 @@
 /* Motiva Vendas — Service Worker (offline + push) */
-const CACHE = "motiva-vendas-v3";
+const CACHE = "motiva-vendas-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -21,7 +21,13 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => self.clients.claim()).then(() =>
+      /* Ao ativar uma NOVA versão, recarrega os apps já abertos pra saírem
+         do código antigo em memória (conserta PWA preso na tela de ontem). */
+      self.clients.matchAll({ type: "window" }).then((cs) =>
+        cs.forEach((c) => { try { c.navigate(c.url); } catch (_) {} })
+      )
+    )
   );
 });
 
