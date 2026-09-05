@@ -2543,7 +2543,7 @@ applyStaticI18n();
         title: "Dica de venda do dia", subNew: "Técnica prática pra usar hoje.", subGot: "Sua dica de hoje · toque pra ver",
         qh: "Rapidinho: como você vende?", qp: "Pra acertar a dica certa pro seu dia. Você muda quando quiser nas Configurações.",
         b2b: ["Vendo para empresas", "frota, software, atacado, insumos"], b2c: ["Vendo pro consumidor", "loja, concessionária, plano, clínica"], c2c: ["Vendo direto pra pessoa física", "usados, brechó, revenda"],
-        today: "🎯 DICA DE HOJE", why: "Por que funciona:", save: "Salvar", share: "Compartilhar", saved: "Salva! ⭐",
+        today: "🎯 DICA DE HOJE", why: "Por que funciona:", save: "⭐ Favoritar", favOn: "⭐ Favoritada", favAdd: "Adicionada aos favoritos ⭐", favRem: "Removida dos favoritos", share: "Compartilhar", saved: "Salva! ⭐",
         invH: "Toda manhã tem uma nova 💪", invP: "Feita pro seu tipo de venda, sem repetir. Quer receber?", invYes: "Quero receber", invNo: "agora não",
         loading: "Preparando sua dica…", fail: "Não consegui carregar a dica agora.", setLabel: "Como você vende", setHint: "Ajusta as dicas de venda pro seu tipo de cliente.", shareSuffix: "— via Motiva Vendas · motivavendas.com.br"
       },
@@ -2551,7 +2551,7 @@ applyStaticI18n();
         title: "Consejo de venta del día", subNew: "Técnica práctica para usar hoy.", subGot: "Tu consejo de hoy · toca para ver",
         qh: "Rápido: ¿cómo vendes?", qp: "Para acertar el consejo de tu día. Lo cambias cuando quieras en Ajustes.",
         b2b: ["Vendo a empresas", "flota, software, mayoreo, insumos"], b2c: ["Vendo al consumidor", "tienda, agencia, plan, clínica"], c2c: ["Vendo directo a personas", "usados, reventa, catálogo"],
-        today: "🎯 CONSEJO DE HOY", why: "Por qué funciona:", save: "Guardar", share: "Compartir", saved: "¡Guardado! ⭐",
+        today: "🎯 CONSEJO DE HOY", why: "Por qué funciona:", save: "⭐ Guardar", favOn: "⭐ Guardada", favAdd: "Agregada a favoritos ⭐", favRem: "Quitada de favoritos", share: "Compartir", saved: "¡Guardado! ⭐",
         invH: "Cada mañana hay uno nuevo 💪", invP: "Hecho para tu tipo de venta, sin repetir. ¿Quieres recibir?", invYes: "Quiero recibir", invNo: "ahora no",
         loading: "Preparando tu consejo…", fail: "No pude cargar el consejo ahora.", setLabel: "¿Cómo vendes?", setHint: "Ajusta los consejos para tu tipo de cliente.", shareSuffix: "— vía Motiva Ventas · motivavendas.com.br"
       }
@@ -2674,7 +2674,7 @@ applyStaticI18n();
       ov.addEventListener("click", function (e) { if (e.target === ov) closeOv(); });
       var chips = ov.querySelectorAll(".mvt-chip");
       for (var i = 0; i < chips.length; i++) (function (b) { b.addEventListener("click", function () { pickProfile(b.getAttribute("data-p")); }); })(chips[i]);
-      $("mvtSave").addEventListener("click", saveTip);
+      $("mvtSave").addEventListener("click", favTip);
       $("mvtShare").addEventListener("click", shareTip);
       $("mvtInvYes").addEventListener("click", function () { closeOv(); if (typeof window.__mvOpenLead === "function") { try { window.__mvOpenLead(); return; } catch (e) {} } });
       $("mvtInvNo").addEventListener("click", closeOv);
@@ -2687,7 +2687,7 @@ applyStaticI18n();
       $("mvtB2Ct").textContent = t.b2c[0]; $("mvtB2Cs").textContent = t.b2c[1];
       $("mvtC2Ct").textContent = t.c2c[0]; $("mvtC2Cs").textContent = t.c2c[1];
       $("mvtLoad").textContent = t.loading; $("mvtToday").textContent = t.today;
-      $("mvtSave").textContent = t.save; $("mvtShare").textContent = t.share;
+      paintFavBtn(); $("mvtShare").textContent = t.share;
       $("mvtInvH").textContent = t.invH; $("mvtInvP").textContent = t.invP; $("mvtInvYes").textContent = t.invYes; $("mvtInvNo").textContent = t.invNo;
     }
     function go(id) { var s = document.querySelectorAll(".mvt-step"); for (var i = 0; i < s.length; i++) s[i].classList.remove("on"); var e = $(id); if (e) e.classList.add("on"); }
@@ -2728,13 +2728,26 @@ applyStaticI18n();
       $("mvtBody").textContent = tip.body || "";
       $("mvtWhy").innerHTML = "💡 <b>" + t.why + "</b> " + (tip.why || "");
       $("mvtInv").style.display = (state.is_public && !state.is_lead) ? "block" : "none";
+      paintFavBtn();
     }
-    function saveTip() {
-      try {
-        var arr = JSON.parse(localStorage.getItem("mv_tips_saved") || "[]");
-        if (state.tip && arr.indexOf(state.tip.title) === -1) { arr.unshift(state.tip.title); localStorage.setItem("mv_tips_saved", JSON.stringify(arr.slice(0, 60))); }
-      } catch (e) {}
-      toast(T().saved);
+    // ---- Favoritar a dica: usa a MESMA lista dos favoritos da frase (mv_favs) ----
+    function tipFavText() {
+      var tip = state.tip; if (!tip) return "";
+      var s = String(tip.title || "").trim();
+      if (tip.body) s += "\n\n" + String(tip.body).trim();
+      return s.trim();
+    }
+    function readFavs() { try { return JSON.parse(localStorage.getItem("mv_favs") || "[]"); } catch (e) { return []; } }
+    function isTipFav() { var txt = tipFavText(); return !!txt && readFavs().indexOf(txt) !== -1; }
+    function paintFavBtn() { var b = $("mvtSave"); if (!b) return; var t = T(); b.textContent = isTipFav() ? t.favOn : t.save; }
+    function favTip() {
+      var txt = tipFavText(); if (!txt) return;
+      var arr = readFavs();
+      var i = arr.indexOf(txt), t = T();
+      if (i === -1) { arr.unshift(txt); toast(t.favAdd); }
+      else { arr.splice(i, 1); toast(t.favRem); }
+      try { localStorage.setItem("mv_favs", JSON.stringify(arr.slice(0, 200))); } catch (e) {}
+      paintFavBtn();
     }
     async function shareTip() {
       if (!state.tip) return;
